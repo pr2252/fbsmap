@@ -267,11 +267,6 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    });
-
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
       maxZoom: 18
@@ -279,16 +274,13 @@
 
     const esriReference = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
-      pane: 'shadowPane' // renders above imagery
+      pane: 'shadowPane'
     });
 
     const map = L.map('map', { 
       zoomControl: true,
-      layers: [osmStandard]
-    }).setView([38.5, -96.0], 5); // Tighter continental US zoom level
-
-    let activeBasemapLayer = osmStandard;
-    let isSatelliteActive = false;
+      layers: [esriSatellite, esriReference]
+    }).setView([38.5, -96.0], 5);
 
     map.createPane('venuePane');
     map.getPane('venuePane').style.zIndex = 500;
@@ -301,26 +293,6 @@
 
     function getConfColor(conf) {
       return CONFERENCE_COLORS[conf] || "#475569";
-    }
-
-    function updateBasemapForZoom() {
-      const currentZoom = map.getZoom();
-      let wantSatellite = currentZoom > 6;
-
-      if (wantSatellite !== isSatelliteActive) {
-        isSatelliteActive = wantSatellite;
-        if (isSatelliteActive) {
-          if (map.hasLayer(osmStandard)) map.removeLayer(osmStandard);
-          map.addLayer(esriSatellite);
-          map.addLayer(esriReference);
-          activeBasemapLayer = esriSatellite;
-        } else {
-          if (map.hasLayer(esriSatellite)) map.removeLayer(esriSatellite);
-          if (map.hasLayer(esriReference)) map.removeLayer(esriReference);
-          map.addLayer(osmStandard);
-          activeBasemapLayer = osmStandard;
-        }
-      }
     }
 
     function updateFilterButtonState() {
@@ -361,7 +333,6 @@
     function updateMap() {
       if (venues.length === 0 || isZoomingToVenue) return;
 
-      updateBasemapForZoom();
       updateFilterButtonState();
 
       const selectedConfs = new Set(
@@ -559,7 +530,6 @@
       }
     });
 
-    map.on('zoomend', updateMap);
     loadGoogleSheetData();
   </script>
 </body>
