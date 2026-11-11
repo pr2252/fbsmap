@@ -21,6 +21,11 @@
       width: 100vw; 
     }
 
+    /* Renders standard OSM tiles as a clean light gray minimalist canvas without API keys */
+    .leaflet-tile-pane {
+      filter: grayscale(100%) brightness(1.18) contrast(0.85);
+    }
+
     /* Top Title Header */
     #top-header {
       position: absolute;
@@ -267,11 +272,9 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    // CartoDB Positron Basemap (Clean light gray matching Pro Map)
-    const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20
+    const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
     });
 
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -279,17 +282,17 @@
       maxZoom: 18
     });
 
-    const esriReference = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    const esriReference = L.services ? null : L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
       pane: 'shadowPane'
     });
 
     const map = L.map('map', { 
       zoomControl: true,
-      layers: [cartoLight]
+      layers: [osmBase]
     }).setView([38.5, -96.0], 5);
 
-    let activeBasemapLayer = cartoLight;
+    let activeBasemapLayer = osmBase;
     let isSatelliteActive = false;
 
     map.createPane('venuePane');
@@ -307,20 +310,20 @@
 
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
-      let wantSatellite = currentZoom > 8; // Switches to aerial + labels when zooming in past regional level (> 8)
+      let wantSatellite = currentZoom > 8; // Switches to aerial + labels when zoomed in past regional level (> 8)
 
       if (wantSatellite !== isSatelliteActive) {
         isSatelliteActive = wantSatellite;
         if (isSatelliteActive) {
-          if (map.hasLayer(cartoLight)) map.removeLayer(cartoLight);
+          if (map.hasLayer(osmBase)) map.removeLayer(osmBase);
           map.addLayer(esriSatellite);
           map.addLayer(esriReference);
           activeBasemapLayer = esriSatellite;
         } else {
           if (map.hasLayer(esriSatellite)) map.removeLayer(esriSatellite);
           if (map.hasLayer(esriReference)) map.removeLayer(esriReference);
-          map.addLayer(cartoLight);
-          activeBasemapLayer = cartoLight;
+          map.addLayer(osmBase);
+          activeBasemapLayer = osmBase;
         }
       }
     }
