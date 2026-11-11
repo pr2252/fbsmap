@@ -267,7 +267,6 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    // Exact Basemaps from Pro Map code
     const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
@@ -298,7 +297,6 @@
       return CONFERENCE_COLORS[conf] || "#475569";
     }
 
-    // Exact zoom logic from Pro Map (switches at zoom 6)
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
       let targetLayer = currentZoom <= 6 ? osmStandard : esriSatellite;
@@ -341,6 +339,7 @@
 
     function resetToDefaultView() {
       map.setView([38.5, -96.0], 5);
+      updateBasemapForZoom();
     }
 
     function handleFilterChange() {
@@ -404,6 +403,15 @@
           L.DomEvent.stopPropagation(e);
           isZoomingToVenue = true;
           
+          // Force switch basemap immediately to satellite when clicking a dot
+          if (map.hasLayer(osmStandard)) {
+            map.removeLayer(osmStandard);
+          }
+          if (!map.hasLayer(esriSatellite)) {
+            map.addLayer(esriSatellite);
+          }
+          activeBasemapLayer = esriSatellite;
+
           map.flyTo(v.coords, 15, { duration: 0.8 });
           marker.openPopup();
 
@@ -548,7 +556,7 @@
       }
     });
 
-    map.on('zoomend', updateMap);
+    map.on('zoomend', updateBasemapForZoom);
     loadGoogleSheetData();
   </script>
 </body>
