@@ -267,7 +267,7 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    // Exact CartoDB Positron Basemap used on the Pro Map
+    // CartoDB Positron Basemap (Clean light gray matching Pro Map)
     const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
@@ -307,7 +307,7 @@
 
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
-      let wantSatellite = currentZoom > 10; // Switches to aerial when zoomed in
+      let wantSatellite = currentZoom > 8; // Switches to aerial + labels when zooming in past regional level (> 8)
 
       if (wantSatellite !== isSatelliteActive) {
         isSatelliteActive = wantSatellite;
