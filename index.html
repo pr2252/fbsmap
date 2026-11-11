@@ -21,11 +21,6 @@
       width: 100vw; 
     }
 
-    /* Renders standard OSM tiles as a clean light gray minimalist canvas without API keys */
-    .leaflet-tile-pane {
-      filter: grayscale(100%) brightness(1.18) contrast(0.85);
-    }
-
     /* Top Title Header */
     #top-header {
       position: absolute;
@@ -272,28 +267,23 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    const osmBase = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Exact Basemaps from Pro Map code
+    const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     });
 
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      attribution: 'Tiles &copy; Esri',
       maxZoom: 18
-    });
-
-    const esriReference = L.services ? null : L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-      maxZoom: 18,
-      pane: 'shadowPane'
     });
 
     const map = L.map('map', { 
       zoomControl: true,
-      layers: [osmBase]
+      layers: [osmStandard]
     }).setView([38.5, -96.0], 5);
 
-    let activeBasemapLayer = osmBase;
-    let isSatelliteActive = false;
+    let activeBasemapLayer = osmStandard;
 
     map.createPane('venuePane');
     map.getPane('venuePane').style.zIndex = 500;
@@ -308,23 +298,17 @@
       return CONFERENCE_COLORS[conf] || "#475569";
     }
 
+    // Exact zoom logic from Pro Map (switches at zoom 6)
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
-      let wantSatellite = currentZoom > 8; // Switches to aerial + labels when zoomed in past regional level (> 8)
+      let targetLayer = currentZoom <= 6 ? osmStandard : esriSatellite;
 
-      if (wantSatellite !== isSatelliteActive) {
-        isSatelliteActive = wantSatellite;
-        if (isSatelliteActive) {
-          if (map.hasLayer(osmBase)) map.removeLayer(osmBase);
-          map.addLayer(esriSatellite);
-          map.addLayer(esriReference);
-          activeBasemapLayer = esriSatellite;
-        } else {
-          if (map.hasLayer(esriSatellite)) map.removeLayer(esriSatellite);
-          if (map.hasLayer(esriReference)) map.removeLayer(esriReference);
-          map.addLayer(osmBase);
-          activeBasemapLayer = osmBase;
+      if (activeBasemapLayer !== targetLayer) {
+        if (map.hasLayer(activeBasemapLayer)) {
+          map.removeLayer(activeBasemapLayer);
         }
+        map.addLayer(targetLayer);
+        activeBasemapLayer = targetLayer;
       }
     }
 
