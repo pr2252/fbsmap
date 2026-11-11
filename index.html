@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>2026 NCAA FBS Stadiums & Conferences</title>
+  <title>FBS Venues by Conference</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -235,7 +235,7 @@
   </style>
 </head>
 <body>
-  <div id="top-header">2026 NCAA FBS Stadiums & Conferences</div>
+  <div id="top-header">FBS Venues by Conference</div>
 
   <div id="status-banner">
     <span class="status-dot"></span>
@@ -273,16 +273,22 @@
     });
 
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
       maxZoom: 18
+    });
+
+    const esriReference = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      pane: 'shadowPane' // renders above imagery
     });
 
     const map = L.map('map', { 
       zoomControl: true,
       layers: [osmStandard]
-    }).setView([39.8283, -98.5795], 4);
+    }).setView([38.5, -96.0], 5); // Tighter continental US zoom level
 
     let activeBasemapLayer = osmStandard;
+    let isSatelliteActive = false;
 
     map.createPane('venuePane');
     map.getPane('venuePane').style.zIndex = 500;
@@ -299,14 +305,21 @@
 
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
-      let targetLayer = currentZoom <= 6 ? osmStandard : esriSatellite;
+      let wantSatellite = currentZoom > 6;
 
-      if (activeBasemapLayer !== targetLayer) {
-        if (map.hasLayer(activeBasemapLayer)) {
-          map.removeLayer(activeBasemapLayer);
+      if (wantSatellite !== isSatelliteActive) {
+        isSatelliteActive = wantSatellite;
+        if (isSatelliteActive) {
+          if (map.hasLayer(osmStandard)) map.removeLayer(osmStandard);
+          map.addLayer(esriSatellite);
+          map.addLayer(esriReference);
+          activeBasemapLayer = esriSatellite;
+        } else {
+          if (map.hasLayer(esriSatellite)) map.removeLayer(esriSatellite);
+          if (map.hasLayer(esriReference)) map.removeLayer(esriReference);
+          map.addLayer(osmStandard);
+          activeBasemapLayer = osmStandard;
         }
-        map.addLayer(targetLayer);
-        activeBasemapLayer = targetLayer;
       }
     }
 
@@ -338,19 +351,7 @@
     }
 
     function resetToDefaultView() {
-      const selectedConfs = new Set(
-        Array.from(document.querySelectorAll('.league-checkbox:checked')).map(cb => cb.value)
-      );
-      const activeCoords = venues
-        .filter(v => selectedConfs.has(v.conference))
-        .map(v => v.coords);
-
-      if (activeCoords.length > 0) {
-        const bounds = L.latLngBounds(activeCoords);
-        map.fitBounds(bounds, { padding: [40, 40] });
-      } else {
-        map.setView([39.8283, -98.5795], 4);
-      }
+      map.setView([38.5, -96.0], 5);
     }
 
     function handleFilterChange() {
@@ -373,7 +374,7 @@
 
       if (!initialFitDone && activeVenuesList.length > 0) {
         initialFitDone = true;
-        resetToDefaultView();
+        map.setView([38.5, -96.0], 5);
       }
 
       // Plot Venues
@@ -433,7 +434,7 @@
       });
     }
 
-    // Dashboard Control: Quick Filter Header + Dropdown
+    // Dashboard Control: Quick Filter Header + Collapsed Dropdown
     const dashboardControl = L.control({ position: 'bottomleft' });
     dashboardControl.onAdd = function() {
       const container = L.DomUtil.create('div', 'dashboard-container');
@@ -455,7 +456,7 @@
           <button class="btn-action" id="btn-group-6">Group of 6</button>
           <button class="btn-action" id="btn-select-none">None</button>
         </div>
-        <details class="league-dropdown" open>
+        <details class="league-dropdown">
           <summary>Select Individual Conferences</summary>
           <div class="league-grid">${checkboxesHtml}</div>
         </details>
