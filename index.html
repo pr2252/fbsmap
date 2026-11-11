@@ -267,10 +267,11 @@
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
     const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    // Esri Light Gray Canvas (Free, no API key required)
-    const esriLightGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-      maxZoom: 16
+    // Exact CartoDB Positron Basemap used on the Pro Map
+    const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
     });
 
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -285,10 +286,10 @@
 
     const map = L.map('map', { 
       zoomControl: true,
-      layers: [esriLightGray]
+      layers: [cartoLight]
     }).setView([38.5, -96.0], 5);
 
-    let activeBasemapLayer = esriLightGray;
+    let activeBasemapLayer = cartoLight;
     let isSatelliteActive = false;
 
     map.createPane('venuePane');
@@ -306,20 +307,20 @@
 
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
-      let wantSatellite = currentZoom > 10; // Switches to aerial with labels when zoomed into city/metro level (> 10)
+      let wantSatellite = currentZoom > 10; // Switches to aerial when zoomed in
 
       if (wantSatellite !== isSatelliteActive) {
         isSatelliteActive = wantSatellite;
         if (isSatelliteActive) {
-          if (map.hasLayer(esriLightGray)) map.removeLayer(esriLightGray);
+          if (map.hasLayer(cartoLight)) map.removeLayer(cartoLight);
           map.addLayer(esriSatellite);
           map.addLayer(esriReference);
           activeBasemapLayer = esriSatellite;
         } else {
           if (map.hasLayer(esriSatellite)) map.removeLayer(esriSatellite);
           if (map.hasLayer(esriReference)) map.removeLayer(esriReference);
-          map.addLayer(esriLightGray);
-          activeBasemapLayer = esriLightGray;
+          map.addLayer(cartoLight);
+          activeBasemapLayer = cartoLight;
         }
       }
     }
