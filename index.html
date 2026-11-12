@@ -277,10 +277,11 @@
       maxZoom: 18
     });
 
+    // Set initial view to match Pro Map continental US center and zoom level 4
     const map = L.map('map', { 
       zoomControl: true,
       layers: [osmStandard]
-    }).setView([38.5, -96.0], 5);
+    }).setView([39.8283, -98.5795], 4);
 
     let activeBasemapLayer = osmStandard;
 
@@ -338,7 +339,7 @@
     }
 
     function resetToDefaultView() {
-      map.setView([38.5, -96.0], 5);
+      map.setView([39.8283, -98.5795], 4);
       updateBasemapForZoom();
     }
 
@@ -362,7 +363,7 @@
 
       if (!initialFitDone && activeVenuesList.length > 0) {
         initialFitDone = true;
-        map.setView([38.5, -96.0], 5);
+        map.setView([39.8283, -98.5795], 4);
       }
 
       // Plot Venues
@@ -403,7 +404,6 @@
           L.DomEvent.stopPropagation(e);
           isZoomingToVenue = true;
           
-          // Force switch basemap immediately to satellite when clicking a dot
           if (map.hasLayer(osmStandard)) {
             map.removeLayer(osmStandard);
           }
