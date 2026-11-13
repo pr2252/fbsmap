@@ -277,11 +277,11 @@
       maxZoom: 18
     });
 
-    // Set initial view to match Pro Map continental US center and zoom level 4
+    // Set initial view wider on mobile/desktop to zoom level 3
     const map = L.map('map', { 
       zoomControl: true,
       layers: [osmStandard]
-    }).setView([39.8283, -98.5795], 4);
+    }).setView([38.0, -96.0], 3);
 
     let activeBasemapLayer = osmStandard;
 
@@ -339,7 +339,7 @@
     }
 
     function resetToDefaultView() {
-      map.setView([39.8283, -98.5795], 4);
+      map.setView([38.0, -96.0], 3);
       updateBasemapForZoom();
     }
 
@@ -363,7 +363,7 @@
 
       if (!initialFitDone && activeVenuesList.length > 0) {
         initialFitDone = true;
-        map.setView([39.8283, -98.5795], 4);
+        map.setView([38.0, -96.0], 3);
       }
 
       // Plot Venues
