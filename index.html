@@ -19,6 +19,7 @@
       height: 100vh; 
       height: 100dvh; 
       width: 100vw; 
+      background: #f8fafc;
     }
 
     /* Top Title Header */
@@ -269,19 +270,22 @@
 
     const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
+      maxZoom: 19,
+      noWrap: true
     });
 
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Tiles &copy; Esri',
-      maxZoom: 18
+      maxZoom: 18,
+      noWrap: true
     });
 
-    // Set initial view wider on mobile/desktop to zoom level 3
+    // Exact Pro Map initial view settings matched with noWrap tiles to prevent ocean repetition
     const map = L.map('map', { 
       zoomControl: true,
+      minZoom: 3,
       layers: [osmStandard]
-    }).setView([38.0, -96.0], 3);
+    }).setView([39.8283, -98.5795], 4);
 
     let activeBasemapLayer = osmStandard;
 
@@ -339,7 +343,7 @@
     }
 
     function resetToDefaultView() {
-      map.setView([38.0, -96.0], 3);
+      map.setView([39.8283, -98.5795], 4);
       updateBasemapForZoom();
     }
 
@@ -363,7 +367,7 @@
 
       if (!initialFitDone && activeVenuesList.length > 0) {
         initialFitDone = true;
-        map.setView([38.0, -96.0], 3);
+        map.setView([39.8283, -98.5795], 4);
       }
 
       // Plot Venues
