@@ -3,135 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FBS Venues by Conference</title>
+  <title>FBS Conference & School Explorer Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     html, body { 
-      margin: 0; 
-      padding: 0; 
-      width: 100%;
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      margin: 0; padding: 0; width: 100%; height: 100%; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      background: #0f172a;
     }
 
-    #map { 
-      height: 100vh; 
-      height: 100dvh; 
-      width: 100vw; 
-      background: #f8fafc;
-    }
-
-    /* Top Title Header */
-    #top-header {
-      position: absolute;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.92);
-      color: #ffffff;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-size: 15px;
-      font-weight: 700;
-      z-index: 10000;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-      backdrop-filter: blur(4px);
-      letter-spacing: 0.5px;
-      pointer-events: none;
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    /* Sync Indicator Status Banner */
-    #status-banner {
-      position: absolute;
-      top: 52px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.88);
-      color: #f8fafc;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-      z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    #dashboard-wrapper {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 6px #22c55e;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
     }
 
-    /* Attribution Offset */
-    .leaflet-bottom.leaflet-left {
-      bottom: 28px !important;
-      left: 10px !important;
+    /* Left Sidebar Tree */
+    #sidebar {
+      width: 340px;
+      background: #ffffff;
+      height: 100%;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      box-sizing: border-box;
+      flex-shrink: 0;
     }
 
-    .dashboard-container {
+    /* Center Map Container */
+    #map-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    /* Right Explorer Panel */
+    #explorer-panel {
+      width: 380px;
+      background: #ffffff;
+      height: 100%;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      box-sizing: border-box;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1100px) {
+      #dashboard-wrapper { flex-direction: column; }
+      
+      /* Map takes 38% height on mobile */
+      #map-container { 
+        height: 38vh !important; 
+        order: 1; 
+        width: 100%;
+      }
+
+      /* Panels take remaining bottom space stacked without tabs */
+      #sidebar {
+        width: 100% !important;
+        height: 62vh !important;
+        order: 2;
+        display: flex !important;
+      }
+
+      #explorer-panel {
+        width: 100% !important;
+        height: 62vh !important;
+        order: 2;
+        display: none !important;
+      }
+
+      #explorer-panel.mobile-active {
+        display: flex !important;
+      }
+      #sidebar.mobile-hidden {
+        display: none !important;
+      }
+    }
+
+    /* Removed frame headers entirely across both desktop & mobile */
+    .sidebar-header, .panel-header {
+      display: none !important;
+    }
+
+    /* Prominent Navigation Bars matching old heading style */
+    .nav-bar-banner {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 800;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-width: 90vw;
-      box-sizing: border-box;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
-    .dashboard-card {
-      background: rgba(255, 255, 255, 0.96);
-      padding: 10px 12px;
-      border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
-      backdrop-filter: blur(4px);
-      box-sizing: border-box;
+    .filter-actions {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
     }
 
-    /* Filter Card */
-    .filter-card {
-      min-width: 210px;
-      max-height: 55vh;
-      overflow-y: auto;
-    }
-
-    .card-title {
-      font-weight: 800;
-      font-size: 11px;
-      margin-bottom: 6px;
-      color: #0f172a;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1.5px solid #e2e8f0;
-      padding-bottom: 4px;
-    }
-
-    .filter-actions { 
-      display: flex; 
-      gap: 4px; 
-      margin-bottom: 8px; 
-      flex-wrap: wrap; 
-    }
-    
     .btn-action {
-      background: #f1f5f9;
+      background: #ffffff;
       border: 1.5px solid #cbd5e1;
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 4px 6px;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       color: #334155;
+      flex: 1;
       transition: all 0.15s ease;
-      touch-action: manipulation;
+      text-align: center;
     }
-    .btn-action:hover { background: #e2e8f0; color: #0f172a; }
+    .btn-action:hover { background: #f1f5f9; color: #0f172a; }
     .btn-action.active {
       background: #0284c7;
       color: #ffffff;
@@ -140,339 +137,555 @@
       box-shadow: 0 0 0 1.5px rgba(2, 132, 199, 0.4);
     }
 
-    .btn-reset {
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      width: 100%;
-      margin-top: 8px;
+    /* Fixed scrolling container for sidebar tree */
+    .sidebar-content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .btn-reset:hover { background: #e2e8f0; color: #0f172a; }
 
-    /* HTML Details / Summary Dropdown */
-    .league-dropdown {
-      margin-top: 4px;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 6px;
+    .section-heading {
+      font-size: 10px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 4px 0 2px 4px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 2px;
+      flex-shrink: 0;
     }
-    .league-dropdown summary {
-      font-size: 11px;
+
+    /* Conference Accordion Card */
+    .conf-group {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #fff;
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+
+    .conf-summary {
+      padding: 8px 10px;
       font-weight: 700;
+      font-size: 11px;
       color: #0f172a;
-      cursor: pointer;
-      user-select: none;
-      outline: none;
-      list-style: none;
+      background: #f8fafc;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-    .league-dropdown summary::-webkit-details-marker {
-      display: none;
-    }
-    .league-dropdown summary::after {
-      content: '▾';
-      font-size: 10px;
-      color: #64748b;
-    }
-    .league-dropdown[open] summary::after {
-      content: '▴';
-    }
-
-    .league-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      margin-top: 6px;
-      padding-left: 2px;
-    }
-    .league-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      margin: 2px 0;
       cursor: pointer;
       user-select: none;
+      border-radius: 6px;
     }
-    .league-option input[type="checkbox"] {
-      cursor: pointer;
-      accent-color: #0284c7;
-      width: 14px;
-      height: 14px;
+    .conf-summary:hover { background: #f1f5f9; }
+
+    .conf-info-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
     }
+
     .conf-swatch {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       display: inline-block;
       flex-shrink: 0;
     }
 
-    /* Standard Reliable Venue Tooltip */
-    .venue-tooltip {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      color: #0f172a;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 7px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer;
-      pointer-events: auto !important;
-      white-space: nowrap;
+    .conf-toggle-arrow {
+      color: #64748b;
+      font-size: 9px;
     }
 
-    /* Pop-up Styling */
-    .popup-title { font-weight: 800; font-size: 14px; margin-bottom: 2px; color: #0f172a; }
-    .popup-subtitle { font-size: 11px; color: #64748b; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-    .team-item { font-size: 12px; margin: 4px 0; line-height: 1.4; color: #334155; }
-    .conf-badge { font-weight: 700; font-size: 10px; color: #fff; padding: 2px 6px; border-radius: 4px; margin-right: 6px; display: inline-block; }
-    .meta-detail { font-size: 11px; color: #475569; margin-top: 4px; line-height: 1.35; }
-    .wiki-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #0284c7; text-decoration: none; font-weight: 600; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0; width: 100%; }
-    .wiki-link:hover { color: #0369a1; text-decoration: underline; }
+    .school-list {
+      padding: 4px 10px 8px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 1px solid #f1f5f9;
+      background: #ffffff;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .school-item {
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      padding: 2px 0;
+    }
+    .school-name:hover { color: #0284c7; text-decoration: underline; }
+    .school-item.selected-active .school-name { color: #0284c7; font-weight: 800; }
+
+    .panel-body {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .venue-photo-container {
+      width: 100%;
+      height: 130px;
+      background: #f1f5f9;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .venue-photo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-placeholder {
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .team-title { font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; }
+    .team-subtitle { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 1px; }
+
+    .conf-badge-large {
+      display: inline-block;
+      font-weight: 800;
+      font-size: 9px;
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .info-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    .info-label { font-size: 8px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+    .info-value { font-size: 11px; font-weight: 700; color: #0f172a; margin-top: 1px; }
+
+    .notes-box {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      color: #92400e;
+      line-height: 1.3;
+    }
+
+    .wiki-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #0284c7;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+      transition: background 0.15s ease;
+    }
+    .wiki-btn:hover { background: #0369a1; }
+
+    .back-conf-btn {
+      background: #334155;
+      color: #ffffff;
+      border: 1.5px solid #475569;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .back-conf-btn:hover { background: #475569; color: #ffffff; }
+
+    .venue-tooltip { background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; font-size: 11px; font-weight: 600; padding: 3px 7px; }
   </style>
 </head>
 <body>
-  <div id="top-header">FBS Venues by Conference</div>
 
-  <div id="status-banner">
-    <span class="status-dot"></span>
-    <span id="status-text">Connecting to Google Sheets...</span>
+  <div id="dashboard-wrapper">
+    <!-- Left Sidebar: FBS Conferences -->
+    <div id="sidebar">
+      <div class="nav-bar-banner">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>FBS Conferences</span>
+          <span id="active-count" style="font-size: 11px; font-weight: 600; opacity: 0.9;">Loading...</span>
+        </div>
+        <div style="display: flex; gap: 4px; width: 100%;">
+          <button class="btn-action active" id="btn-select-all" style="background:#334155; border-color:#475569; color:#fff;">All</button>
+          <button class="btn-action" id="btn-power-4" style="background:#334155; border-color:#475569; color:#fff;">Power 4</button>
+          <button class="btn-action" id="btn-group-6" style="background:#334155; border-color:#475569; color:#fff;">Group of 6</button>
+          <button class="btn-action" id="btn-select-none" style="background:#334155; border-color:#475569; color:#fff;">None</button>
+        </div>
+      </div>
+      <div class="sidebar-content" id="sidebar-tree"></div>
+    </div>
+
+    <!-- Center Map -->
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
+
+    <!-- Right Explorer Panel: School & Venue Details -->
+    <div id="explorer-panel">
+      <div class="nav-bar-banner">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>School & Venue Details</span>
+        </div>
+        <button class="back-conf-btn" id="back-to-conf-btn">&larr; Back to Conferences</button>
+      </div>
+      <div class="panel-body" id="panel-content">
+        <div class="venue-photo-container">
+          <div class="photo-placeholder">Click any stadium marker on the map or school name in the sidebar to inspect details and Wikipedia photos.</div>
+        </div>
+        <div>
+          <h2 class="team-title">Select a School</h2>
+          <div class="team-subtitle">Interactive Dashboard</div>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div id="map"></div>
 
   <script>
     const SPREADSHEET_ID = "1XHaT57dHhRLtMojDEXhMn8AMScxz5F7WBe1i8y6NIe4";
     const SHEET_NAME = "NCAA FBS";
 
-    // Conference Color Palette
     const CONFERENCE_COLORS = {
-      "ACC": "#005596",
-      "Big Ten": "#00274c",
-      "Big 12": "#c41230",
-      "SEC": "#e0a100",
-      "AAC": "#002b49",
-      "CUSA": "#d1261d",
-      "MAC": "#00529b",
-      "Mountain West": "#582c83",
-      "Pac-12": "#004b87",
-      "Sun Belt": "#e06d00",
-      "Independent": "#64748b"
+      "ACC": "#005596", "Big Ten": "#00274c", "Big 12": "#c41230",
+      "SEC": "#e0a100", "AAC": "#002b49", "CUSA": "#d1261d",
+      "MAC": "#00529b", "Mountain West": "#582c83", "Pac-12": "#004b87",
+      "Sun Belt": "#e06d00", "Independent": "#64748b"
     };
 
     const POWER_4 = new Set(["ACC", "Big Ten", "Big 12", "SEC"]);
     const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
-    const ALL_CONFERENCES = ["ACC", "Big Ten", "Big 12", "SEC", "AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt", "Independent"];
 
-    const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19,
-      noWrap: true
-    });
+    const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, noWrap: true });
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, noWrap: true });
 
-    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri',
-      maxZoom: 18,
-      noWrap: true
-    });
-
-    // Exact Pro Map initial view settings matched with noWrap tiles to prevent ocean repetition
-    const map = L.map('map', { 
-      zoomControl: true,
-      minZoom: 3,
-      layers: [osmStandard]
-    }).setView([39.8283, -98.5795], 4);
-
+    const initialZoom = window.innerWidth <= 1100 ? 3 : 4;
+    const map = L.map('map', { zoomControl: true, minZoom: 3, layers: [osmStandard] }).setView([39.8283, -98.5795], initialZoom);
     let activeBasemapLayer = osmStandard;
-
-    map.createPane('venuePane');
-    map.getPane('venuePane').style.zIndex = 500;
-
     const venueLayer = L.layerGroup().addTo(map);
 
     let venues = [];
-    let initialFitDone = false;
-    let isZoomingToVenue = false;
+    let markersMap = {}; 
+    let activeConference = null;
 
-    function getConfColor(conf) {
-      return CONFERENCE_COLORS[conf] || "#475569";
+    function getNationalZoom() {
+      return window.innerWidth <= 1100 ? 3 : 4;
     }
 
     function updateBasemapForZoom() {
       const currentZoom = map.getZoom();
       let targetLayer = currentZoom <= 6 ? osmStandard : esriSatellite;
-
       if (activeBasemapLayer !== targetLayer) {
-        if (map.hasLayer(activeBasemapLayer)) {
-          map.removeLayer(activeBasemapLayer);
-        }
+        if (map.hasLayer(activeBasemapLayer)) map.removeLayer(activeBasemapLayer);
         map.addLayer(targetLayer);
         activeBasemapLayer = targetLayer;
       }
     }
 
-    function updateFilterButtonState() {
-      const allCheckboxes = Array.from(document.querySelectorAll('.league-checkbox'));
-      const checkedValues = new Set(allCheckboxes.filter(cb => cb.checked).map(cb => cb.value));
-
-      const btnAll = document.getElementById('btn-select-all');
-      const btnP4 = document.getElementById('btn-power-4');
-      const btnG6 = document.getElementById('btn-group-6');
-      const btnNone = document.getElementById('btn-select-none');
-
-      if (!btnAll || !btnP4 || !btnG6 || !btnNone) return;
-
-      btnAll.classList.remove('active');
-      btnP4.classList.remove('active');
-      btnG6.classList.remove('active');
-      btnNone.classList.remove('active');
-
-      if (checkedValues.size === 0) {
-        btnNone.classList.add('active');
-      } else if (checkedValues.size === allCheckboxes.length) {
-        btnAll.classList.add('active');
-      } else if (checkedValues.size === POWER_4.size && [...POWER_4].every(v => checkedValues.has(v))) {
-        btnP4.classList.add('active');
-      } else if (checkedValues.size === GROUP_OF_6.size && [...GROUP_OF_6].every(v => checkedValues.has(v))) {
-        btnG6.classList.add('active');
+    function showMobilePanel(panelType) {
+      const sidebar = document.getElementById('sidebar');
+      const explorer = document.getElementById('explorer-panel');
+      if (panelType === 'explorer') {
+        explorer.classList.add('mobile-active');
+        sidebar.classList.add('mobile-hidden');
+      } else {
+        explorer.classList.remove('mobile-active');
+        sidebar.classList.remove('mobile-hidden');
       }
+      setTimeout(() => { map.invalidateSize(); }, 100);
     }
 
-    function resetToDefaultView() {
-      map.setView([39.8283, -98.5795], 4);
-      updateBasemapForZoom();
-    }
-
-    function handleFilterChange() {
-      updateMap();
-    }
-
-    function updateMap() {
-      if (venues.length === 0 || isZoomingToVenue) return;
-
-      updateBasemapForZoom();
-      updateFilterButtonState();
-
-      const selectedConfs = new Set(
-        Array.from(document.querySelectorAll('.league-checkbox:checked')).map(cb => cb.value)
-      );
-
-      venueLayer.clearLayers();
-
-      const activeVenuesList = venues.filter(v => selectedConfs.has(v.conference));
-
-      if (!initialFitDone && activeVenuesList.length > 0) {
-        initialFitDone = true;
-        map.setView([39.8283, -98.5795], 4);
-      }
-
-      // Plot Venues
-      activeVenuesList.forEach(v => {
-        const color = getConfColor(v.conference);
-
-        const marker = L.circleMarker(v.coords, {
-          pane: 'venuePane',
-          radius: 6.5,
-          fillColor: color,
-          color: "#ffffff",
-          weight: 1.5,
-          opacity: 1,
-          fillOpacity: 0.95
-        }).addTo(venueLayer);
-
-        const capacityStr = v.capacity ? Number(v.capacity).toLocaleString() : 'N/A';
-        const wikiUrl = v.wikiUrl && v.wikiUrl.startsWith('http') 
-          ? v.wikiUrl 
-          : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.venue + ' ' + v.college)}`;
-
-        const popupMarkup = `
-          <div class="popup-title">${v.college} ${v.mascot}</div>
-          <div class="popup-subtitle">
-            <span class="conf-badge" style="background:${color};">${v.conference}</span>
-            ${v.venueCity}
-          </div>
-          <div class="team-item"><b>Venue:</b> ${v.venue}</div>
-          <div class="meta-detail"><b>Capacity:</b> ${capacityStr}</div>
-          ${v.notes ? `<div class="meta-detail"><b>Notes:</b> ${v.notes}</div>` : ''}
-          <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="wiki-link">Wikipedia: ${v.venue} &rarr;</a>
-        `;
-
-        const venuePopup = L.popup({ autoPan: false, className: 'venue-popup-marker' }).setContent(popupMarkup);
-        marker.bindPopup(venuePopup);
-
-        const handleVenueClick = function(e) {
-          L.DomEvent.stopPropagation(e);
-          isZoomingToVenue = true;
-          
-          if (map.hasLayer(osmStandard)) {
-            map.removeLayer(osmStandard);
-          }
-          if (!map.hasLayer(esriSatellite)) {
-            map.addLayer(esriSatellite);
-          }
-          activeBasemapLayer = esriSatellite;
-
-          map.flyTo(v.coords, 15, { duration: 0.8 });
-          marker.openPopup();
-
-          setTimeout(() => {
-            isZoomingToVenue = false;
-          }, 900);
-        };
-
-        marker.on('click', handleVenueClick);
-
-        marker.bindTooltip(`<b>${v.college}</b><br><span style="color:#64748b; font-size:10px;">${v.venue}</span>`, {
-          direction: 'top',
-          className: 'venue-tooltip',
-          offset: [0, -8],
-          interactive: true
-        });
-      });
-    }
-
-    // Dashboard Control: Quick Filter Header + Collapsed Dropdown
-    const dashboardControl = L.control({ position: 'bottomleft' });
-    dashboardControl.onAdd = function() {
-      const container = L.DomUtil.create('div', 'dashboard-container');
-      const filterCard = L.DomUtil.create('div', 'dashboard-card filter-card', container);
-
-      let checkboxesHtml = ALL_CONFERENCES.map(conf => `
-        <label class="league-option">
-          <input type="checkbox" class="league-checkbox" value="${conf}" checked>
-          <span class="conf-swatch" style="background:${getConfColor(conf)};"></span>
-          <span>${conf}</span>
-        </label>
-      `).join('');
-
-      filterCard.innerHTML = `
-        <div class="card-title">Filter Conferences</div>
-        <div class="filter-actions">
-          <button class="btn-action active" id="btn-select-all">All</button>
-          <button class="btn-action" id="btn-power-4">Power 4</button>
-          <button class="btn-action" id="btn-group-6">Group of 6</button>
-          <button class="btn-action" id="btn-select-none">None</button>
+    function resetRightPanel() {
+      const panelContent = document.getElementById('panel-content');
+      panelContent.innerHTML = `
+        <div class="venue-photo-container">
+          <div class="photo-placeholder">Click any stadium marker on the map or school name in the sidebar to inspect details and Wikipedia photos.</div>
         </div>
-        <details class="league-dropdown">
-          <summary>Select Individual Conferences</summary>
-          <div class="league-grid">${checkboxesHtml}</div>
-        </details>
-        <button class="btn-action btn-reset" id="btn-reset-view">Zoom Out</button>
+        <div>
+          <h2 class="team-title">Select a School</h2>
+          <div class="team-subtitle">Interactive Dashboard</div>
+        </div>
+      `;
+      document.querySelectorAll('.school-item').forEach(el => el.classList.remove('selected-active'));
+      if (window.innerWidth <= 1100) {
+        showMobilePanel('sidebar');
+      }
+    }
+
+    async function fetchWikiImage(wikiUrl, venueName) {
+      let titles = [];
+      if (wikiUrl && wikiUrl.includes('/wiki/')) {
+        let slug = wikiUrl.split('/wiki/')[1];
+        titles.push(slug);
+      }
+      titles.push(encodeURIComponent(venueName));
+
+      for (let t of titles) {
+        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=600&titles=${t}&origin=*`;
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          const pages = data.query.pages;
+          for (let id in pages) {
+            if (pages[id].thumbnail && pages[id].thumbnail.source) {
+              return pages[id].thumbnail.source;
+            }
+          }
+        } catch (e) {
+          console.log("Wiki fetch error for title:", t);
+        }
+      }
+      return null;
+    }
+
+    async function showVenueDetails(v) {
+      const color = CONFERENCE_COLORS[v.conference] || "#475569";
+      const capacityStr = v.capacity ? Number(v.capacity).toLocaleString() : 'N/A';
+      const wikiUrl = v.wikiUrl && v.wikiUrl.startsWith('http') ? v.wikiUrl : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.venue + ' ' + v.college)}`;
+
+      const panelContent = document.getElementById('panel-content');
+      panelContent.innerHTML = `
+        <div class="venue-photo-container" id="photo-box">
+          <div class="photo-placeholder">Loading Wikipedia photo...</div>
+        </div>
+        <div>
+          <span class="conf-badge-large" style="background:${color};">${v.conference}</span>
+          <h2 class="team-title">${v.college} ${v.mascot}</h2>
+          <div class="team-subtitle">${v.venueCity}</div>
+        </div>
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-label">Venue Name</div>
+            <div class="info-value" style="font-size: 11px; margin-top:2px;">${v.venue}</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Capacity</div>
+            <div class="info-value">${capacityStr}</div>
+          </div>
+        </div>
+        <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="wiki-btn">View on Wikipedia &rarr;</a>
+        ${v.notes ? `<div class="notes-box"><b>Notes:</b> ${v.notes}</div>` : ''}
       `;
 
-      L.DomEvent.disableClickPropagation(container);
-      L.DomEvent.disableScrollPropagation(container);
-      return container;
-    };
-    dashboardControl.addTo(map);
+      if (window.innerWidth <= 1100) {
+        showMobilePanel('explorer');
+      }
+
+      document.querySelectorAll('.school-item').forEach(el => el.classList.remove('selected-active'));
+      const activeEl = document.getElementById(`school-item-${v.college.replace(/\s+/g, '_')}`);
+      if (activeEl) activeEl.classList.add('selected-active');
+
+      const imgUrl = await fetchWikiImage(v.wikiUrl, v.venue);
+      const photoBox = document.getElementById('photo-box');
+      if (photoBox) {
+        if (imgUrl) {
+          photoBox.innerHTML = `<img src="${imgUrl}" alt="${v.venue}">`;
+        } else {
+          photoBox.innerHTML = `<div class="photo-placeholder">No Wikipedia photo available</div>`;
+        }
+      }
+    }
+
+    function renderSidebarTree(groupedData) {
+      const container = document.getElementById('sidebar-tree');
+      container.innerHTML = '';
+
+      function renderGroupList(title, confNames) {
+        const heading = document.createElement('div');
+        heading.className = 'section-heading';
+        heading.textContent = title;
+        container.appendChild(heading);
+
+        confNames.sort().forEach(conf => {
+          if (!groupedData[conf]) return;
+          const schools = groupedData[conf].sort((a, b) => a.college.localeCompare(b.college));
+          const color = CONFERENCE_COLORS[conf] || "#475569";
+
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'conf-group';
+
+          const summaryDiv = document.createElement('div');
+          summaryDiv.className = 'conf-summary';
+          summaryDiv.innerHTML = `
+            <div class="conf-info-left">
+              <span class="conf-swatch" style="background:${color};"></span>
+              <span><b>${conf}</b> (${schools.length})</span>
+            </div>
+            <span class="conf-toggle-arrow">▼</span>
+          `;
+
+          const listDiv = document.createElement('div');
+          listDiv.className = 'school-list';
+          listDiv.style.display = 'none';
+
+          summaryDiv.addEventListener('click', () => {
+            const isHidden = listDiv.style.display === 'none';
+
+            document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
+
+            if (isHidden) {
+              listDiv.style.display = 'flex';
+              summaryDiv.querySelector('.conf-toggle-arrow').textContent = '▲';
+              activeConference = conf;
+            } else {
+              activeConference = null;
+            }
+
+            ['btn-select-all', 'btn-power-4', 'btn-group-6', 'btn-select-none'].forEach(id => {
+              const btn = document.getElementById(id);
+              if (btn) btn.style.background = '#334155';
+            });
+
+            updateMapFilters();
+            map.setView([39.8283, -98.5795], getNationalZoom());
+            resetRightPanel();
+          });
+
+          schools.forEach(v => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'school-item';
+            itemDiv.id = `school-item-${v.college.replace(/\s+/g, '_')}`;
+            itemDiv.innerHTML = `<span class="school-name">${v.college}</span>`;
+
+            itemDiv.addEventListener('click', (e) => {
+              e.stopPropagation();
+              map.flyTo(v.coords, 15, { duration: 0.8 });
+              if (markersMap[v.college]) {
+                markersMap[v.college].openPopup();
+              }
+              showVenueDetails(v);
+            });
+
+            listDiv.appendChild(itemDiv);
+          });
+
+          groupDiv.appendChild(summaryDiv);
+          groupDiv.appendChild(listDiv);
+          container.appendChild(groupDiv);
+        });
+      }
+
+      const p4Confs = Object.keys(groupedData).filter(c => POWER_4.has(c));
+      const g6Confs = Object.keys(groupedData).filter(c => GROUP_OF_6.has(c));
+      const otherConfs = Object.keys(groupedData).filter(c => !POWER_4.has(c) && !GROUP_OF_6.has(c));
+
+      renderGroupList("Power 4", p4Confs);
+      renderGroupList("Group of 6", g6Confs);
+      if (otherConfs.length > 0) {
+        renderGroupList("Other / Independents", otherConfs);
+      }
+
+      updateMapFilters();
+    }
+
+    function updateMapFilters() {
+      venueLayer.clearLayers();
+      markersMap = {};
+      let visibleCount = 0;
+
+      venues.forEach(v => {
+        let show = false;
+        if (activeConference) {
+          show = (v.conference === activeConference);
+        } else {
+          const btnAll = document.getElementById('btn-select-all');
+          const btnP4 = document.getElementById('btn-power-4');
+          const btnG6 = document.getElementById('btn-group-6');
+          const btnNone = document.getElementById('btn-select-none');
+
+          if (btnAll.classList.contains('active')) show = true;
+          else if (btnP4.classList.contains('active')) show = POWER_4.has(v.conference);
+          else if (btnG6.classList.contains('active')) show = GROUP_OF_6.has(v.conference);
+          else if (btnNone.classList.contains('active')) show = false;
+          else show = true;
+        }
+
+        if (show) {
+          visibleCount++;
+          const color = CONFERENCE_COLORS[v.conference] || "#475569";
+          const marker = L.circleMarker(v.coords, {
+            radius: 6.5, fillColor: color, color: "#ffffff", weight: 1.5, opacity: 1, fillOpacity: 0.95
+          }).addTo(venueLayer);
+
+          marker.on('click', () => {
+            map.flyTo(v.coords, 15, { duration: 0.8 });
+            showVenueDetails(v);
+          });
+
+          marker.bindTooltip(`<b>${v.college}</b>`, { direction: 'top', className: 'venue-tooltip', offset: [0, -8] });
+          markersMap[v.college] = marker;
+        }
+      });
+
+      document.getElementById('active-count').textContent = `${visibleCount} of ${venues.length} teams shown`;
+      updateBasemapForZoom();
+    }
+
+    function setActiveFilterButton(btnId) {
+      ['btn-select-all', 'btn-power-4', 'btn-group-6', 'btn-select-none'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.classList.remove('active');
+        btn.style.background = '#334155';
+        btn.style.borderColor = '#475569';
+      });
+      const activeBtn = document.getElementById(btnId);
+      activeBtn.classList.add('active');
+      activeBtn.style.background = '#0284c7';
+      activeBtn.style.borderColor = '#0369a1';
+
+      activeConference = null;
+      document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
+      map.setView([39.8283, -98.5795], getNationalZoom());
+      resetRightPanel();
+    }
 
     window.handleGvizResponse = function(response) {
       if (!response || !response.table) return;
-
       const cols = response.table.cols.map((c, idx) => (c && c.label) ? c.label.trim() : String.fromCharCode(65 + idx));
       const rawRows = response.table.rows.map(r => {
         let rowObj = {};
@@ -494,74 +707,66 @@
       }
 
       venues = [];
+      const grouped = {};
+
       rawRows.forEach(row => {
-        const conf = String(getRowVal(row, ['FBS Conference', 'Conference', 'FCS Conference']) || '').trim();
-        const college = String(getRowVal(row, ['College/University Name', 'College', 'Team Name', 'Team']) || '').trim();
+        const conf = String(getRowVal(row, ['FBS Conference', 'Conference']) || '').trim();
+        const college = String(getRowVal(row, ['College/University Name', 'College', 'Team Name']) || '').trim();
         const mascot = String(getRowVal(row, ['Mascot']) || '').trim();
         const venueName = String(getRowVal(row, ['Venue Name', 'Venue']) || '').trim();
         const venueCity = String(getRowVal(row, ['Venue City', 'City']) || '').trim();
-        const capacity = getRowVal(row, ['Venue Capacity for Football', 'Capacity', 'Venue Capacity']);
+        const capacity = getRowVal(row, ['Venue Capacity for Football', 'Capacity']);
         const notes = String(getRowVal(row, ['Notes (as needed)', 'Notes']) || '').trim();
         const lat = parseFloat(getRowVal(row, ['Latitude', 'Lat']));
         const lng = parseFloat(getRowVal(row, ['Longitude', 'Lng']));
         const wikiUrl = String(getRowVal(row, ['Venue Wiki', 'Wiki', 'Wikipedia']) || '').trim();
 
         if (!venueName || isNaN(lat) || isNaN(lng) || !college) return;
+        const vObj = { conference: conf, college, mascot, venue: venueName, venueCity, capacity, notes, coords: [lat, lng], wikiUrl };
+        venues.push(vObj);
 
-        venues.push({
-          conference: conf,
-          college: college,
-          mascot: mascot,
-          venue: venueName,
-          venueCity: venueCity,
-          capacity: capacity,
-          notes: notes,
-          coords: [lat, lng],
-          wikiUrl: wikiUrl
-        });
+        if (!grouped[conf]) grouped[conf] = [];
+        grouped[conf].push(vObj);
       });
 
-      const banner = document.getElementById('status-banner');
-      document.getElementById('status-text').textContent = `Live Synced (${venues.length} FBS teams loaded)`;
-      setTimeout(() => { banner.style.opacity = '0'; }, 2500);
-
-      updateMap();
+      renderSidebarTree(grouped);
     };
 
-    function loadGoogleSheetData() {
-      const gvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:handleGvizResponse`;
-      const script = document.createElement('script');
-      script.src = gvizUrl;
-      document.body.appendChild(script);
-    }
-
-    document.addEventListener('change', function(e) {
-      if (e.target && e.target.classList.contains('league-checkbox')) {
-        handleFilterChange();
-      }
+    // Top Filter Buttons
+    document.getElementById('btn-select-all').addEventListener('click', () => {
+      setActiveFilterButton('btn-select-all');
+      updateMapFilters();
+    });
+    document.getElementById('btn-power-4').addEventListener('click', () => {
+      setActiveFilterButton('btn-power-4');
+      updateMapFilters();
+    });
+    document.getElementById('btn-group-6').addEventListener('click', () => {
+      setActiveFilterButton('btn-group-6');
+      updateMapFilters();
+    });
+    document.getElementById('btn-select-none').addEventListener('click', () => {
+      setActiveFilterButton('btn-select-none');
+      updateMapFilters();
     });
 
-    document.addEventListener('click', function(e) {
-      if (!e.target) return;
-      if (e.target.id === 'btn-select-all') {
-        document.querySelectorAll('.league-checkbox').forEach(cb => cb.checked = true);
-        handleFilterChange();
-      } else if (e.target.id === 'btn-power-4') {
-        document.querySelectorAll('.league-checkbox').forEach(cb => { cb.checked = POWER_4.has(cb.value); });
-        handleFilterChange();
-      } else if (e.target.id === 'btn-group-6') {
-        document.querySelectorAll('.league-checkbox').forEach(cb => { cb.checked = GROUP_OF_6.has(cb.value); });
-        handleFilterChange();
-      } else if (e.target.id === 'btn-select-none') {
-        document.querySelectorAll('.league-checkbox').forEach(cb => cb.checked = false);
-        handleFilterChange();
-      } else if (e.target.id === 'btn-reset-view') {
-        resetToDefaultView();
-      }
+    // Initialize initial active button state color
+    const initialActiveBtn = document.getElementById('btn-select-all');
+    initialActiveBtn.style.background = '#0284c7';
+    initialActiveBtn.style.borderColor = '#0369a1';
+
+    // Back to Conferences listener
+    document.getElementById('back-to-conf-btn').addEventListener('click', () => {
+      map.setView([39.8283, -98.5795], getNationalZoom());
+      resetRightPanel();
     });
+
+    const gvizUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=responseHandler:handleGvizResponse`;
+    const script = document.createElement('script');
+    script.src = gvizUrl;
+    document.body.appendChild(script);
 
     map.on('zoomend', updateBasemapForZoom);
-    loadGoogleSheetData();
   </script>
 </body>
 </html>
