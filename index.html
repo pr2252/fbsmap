@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pro Sports Explorer</title>
+  <title>FBS Explorer</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -90,11 +90,12 @@
       }
     }
 
+    /* Removed frame headers entirely across both desktop & mobile */
     .sidebar-header, .panel-header {
       display: none !important;
     }
 
-    /* Prominent Navigation Bars matching heading style */
+    /* Prominent Navigation Bars matching old heading style */
     .nav-bar-banner {
       background: #1e293b;
       color: #ffffff;
@@ -159,7 +160,7 @@
       flex-shrink: 0;
     }
 
-    /* League Accordion Card */
+    /* Conference Accordion Card */
     .conf-group {
       border: 1px solid #e2e8f0;
       border-radius: 6px;
@@ -336,93 +337,27 @@
     }
     .back-conf-btn:hover { background: #475569; color: #ffffff; }
 
-    .venue-tooltip { background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; font-size: 10px; font-weight: 500; padding: 2px 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .games-dropdown-header {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 11px;
-      font-weight: 800;
-      color: #0f172a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-    }
-    .games-dropdown-header:hover { background: #f1f5f9; }
-    .games-dropdown-body {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      padding: 8px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: -6px;
-    }
-    .game-feed-item {
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 6px 8px;
-      background: #f8fafc;
-      font-size: 10px;
-      color: #334155;
-      line-height: 1.35;
-    }
-    .game-feed-team {
-      font-weight: 800;
-      color: #0284c7;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .game-feed-team:hover { text-decoration: underline; }
-    .game-feed-meta {
-      font-size: 9px;
-      color: #64748b;
-      font-weight: 600;
-      margin-top: 2px;
-    }
+    .venue-tooltip { background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; border-radius: 4px; color: #0f172a; font-size: 11px; font-weight: 600; padding: 3px 7px; }
   </style>
 </head>
 <body>
 
   <div id="dashboard-wrapper">
-    <!-- Left Sidebar: Pro Sports -->
+    <!-- Left Sidebar: FBS Conferences -->
     <div id="sidebar">
       <div class="nav-bar-banner">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>Pro Sports</span>
+          <span>FBS Conferences</span>
           <span id="active-count" style="font-size: 11px; font-weight: 600; opacity: 0.9;">Loading...</span>
         </div>
         <div style="display: flex; gap: 4px; width: 100%;">
           <button class="btn-action active" id="btn-select-all" style="background:#334155; border-color:#475569; color:#fff;">All</button>
-          <button class="btn-action" id="btn-big-4" style="background:#334155; border-color:#475569; color:#fff;">Big 4</button>
-          <button class="btn-action" id="btn-little-3" style="background:#334155; border-color:#475569; color:#fff;">Little 3</button>
+          <button class="btn-action" id="btn-power-4" style="background:#334155; border-color:#475569; color:#fff;">Power 4</button>
+          <button class="btn-action" id="btn-group-6" style="background:#334155; border-color:#475569; color:#fff;">Group of 6</button>
+          <button class="btn-action" id="btn-select-none" style="background:#334155; border-color:#475569; color:#fff;">None</button>
         </div>
       </div>
-      <div class="sidebar-content" id="sidebar-tree-wrap" style="gap: 8px;">
-        <div class="conf-group" id="home-games-dropdown-group" style="flex-shrink:0;">
-          <div class="games-dropdown-header" id="home-games-dropdown-toggle">
-            <span>Select Dates to View Home Games</span>
-            <span id="home-games-dropdown-arrow" style="font-size:9px; color:#64748b;">▼</span>
-          </div>
-          <div class="games-dropdown-body" id="home-games-dropdown-body" style="display:none;">
-            <div style="display:flex; gap:4px; width:100%;">
-              <button class="btn-action" id="btn-today" style="background:#334155; border-color:#475569; color:#fff;">Today</button>
-            </div>
-            <div style="display:flex; gap:4px; width:100%; align-items:center;">
-              <input type="date" id="date-start" title="Start date" style="flex:1; min-width:0; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; border-radius:4px; padding:3px 5px; font-size:10px; font-weight:600;">
-              <span style="font-size:10px; color:#64748b;">to</span>
-              <input type="date" id="date-end" title="End date (optional)" style="flex:1; min-width:0; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; border-radius:4px; padding:3px 5px; font-size:10px; font-weight:600;">
-              <button class="btn-action" id="btn-apply-dates" style="flex:0 0 auto; padding:3px 8px; background:#334155; border-color:#475569; color:#fff;">Go</button>
-            </div>
-          </div>
-        </div>
-        <div id="sidebar-tree" style="display:flex; flex-direction:column; gap:6px;"></div>
-      </div>
+      <div class="sidebar-content" id="sidebar-tree"></div>
     </div>
 
     <!-- Center Map -->
@@ -430,24 +365,24 @@
       <div id="map"></div>
     </div>
 
-    <!-- Right Explorer Panel: Team & Venue Details -->
+    <!-- Right Explorer Panel: School & Venue Details -->
     <div id="explorer-panel">
       <div class="nav-bar-banner">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>Team & Venue Details</span>
+          <span>School & Venue Details</span>
         </div>
         <div style="display: flex; gap: 4px; width: 100%;">
-          <button class="back-conf-btn" id="back-to-conf-btn">&larr; Back to Leagues</button>
+          <button class="back-conf-btn" id="back-to-conf-btn">&larr; Back to Conferences</button>
           <button class="back-conf-btn" id="prev-venue-btn">Previous</button>
           <button class="back-conf-btn" id="next-venue-btn">Next</button>
         </div>
       </div>
       <div class="panel-body" id="panel-content">
         <div class="venue-photo-container">
-          <div class="photo-placeholder">Click any stadium marker on the map or team name in the sidebar to inspect details and Wikipedia photos.</div>
+          <div class="photo-placeholder">Click any stadium marker on the map or school name in the sidebar to inspect details and Wikipedia photos.</div>
         </div>
         <div>
-          <h2 class="team-title">Select a Team</h2>
+          <h2 class="team-title">Select a School</h2>
           <div class="team-subtitle">Interactive Dashboard</div>
         </div>
       </div>
@@ -456,254 +391,17 @@
 
   <script>
     const SPREADSHEET_ID = "1XHaT57dHhRLtMojDEXhMn8AMScxz5F7WBe1i8y6NIe4";
-    const SHEET_NAME = "Pro";
+    const SHEET_NAME = "NCAA FBS";
 
-    const LEAGUE_COLORS = {
-      "NFL": "#0284c7",   /* Blue */
-      "MLB": "#dc2626",   /* Red */
-      "NBA": "#ea580c",   /* Orange */
-      "NHL": "#4f46e5",   /* Indigo */
-      "MLS": "#16a34a",   /* Green */
-      "NWSL": "#db2777",  /* Pink */
-      "WNBA": "#9333ea"   /* Purple */
+    const CONFERENCE_COLORS = {
+      "ACC": "#005596", "Big Ten": "#00274c", "Big 12": "#c41230",
+      "SEC": "#e0a100", "AAC": "#002b49", "CUSA": "#d1261d",
+      "MAC": "#00529b", "Mountain West": "#582c83", "Pac-12": "#004b87",
+      "Sun Belt": "#e06d00", "Independent": "#64748b"
     };
 
-    const ALL_LEAGUES_ORDER = ["NFL", "MLB", "NBA", "NHL", "MLS", "NWSL", "WNBA"];
-    const BIG_4 = new Set(["NFL", "MLB", "NBA", "NHL"]);
-
-    const ESPN_SCOREBOARD_URLS = {
-      "NFL": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard",
-      "MLB": "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard",
-      "NBA": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard",
-      "NHL": "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard",
-      "MLS": "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard",
-      "NWSL": "https://site.api.espn.com/apis/site/v2/sports/soccer/usa.nwsl/scoreboard",
-      "WNBA": "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
-    };
-
-    const LITTLE_3 = new Set(["MLS", "NWSL", "WNBA"]);
-    let scheduleLoaded = false;
-    let activeDateRangeLabel = 'Today';
-    let dateWindowActive = false;
-    let nextHomeLookupLoaded = false;
-    const MAX_RANGE_DAYS = 14;
-    const NEXT_HOME_LOOKAHEAD_DAYS = 45;
-
-    function formatIsoLocalDate(dt) {
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth() + 1).padStart(2, '0');
-      const d = String(dt.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function getLocalDateYMD(isoStr) {
-      if (isoStr) return isoStr.replace(/-/g, '');
-      return formatIsoLocalDate(new Date()).replace(/-/g, '');
-    }
-
-    function enumerateDatesYMD(startIso, endIso, maxDays = MAX_RANGE_DAYS) {
-      const startStr = startIso || formatIsoLocalDate(new Date());
-      const endStr = endIso || startStr;
-      const [sy, sm, sd] = startStr.split('-').map(Number);
-      const [ey, em, ed] = endStr.split('-').map(Number);
-      let cur = new Date(sy, sm - 1, sd);
-      let end = new Date(ey, em - 1, ed);
-      if (isNaN(cur.getTime()) || isNaN(end.getTime())) return [getLocalDateYMD()];
-      if (end < cur) { const tmp = cur; cur = end; end = tmp; }
-
-      const dates = [];
-      for (let i = 0; i < maxDays && cur <= end; i++) {
-        dates.push(getLocalDateYMD(formatIsoLocalDate(cur)));
-        cur.setDate(cur.getDate() + 1);
-      }
-      return dates;
-    }
-
-    function normalizeTeamKey(str) {
-      return String(str || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9 ]/g, '')
-        .replace(/\b(fc|sc|cf|united|city|athletic|club)\b/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function formatGameTime(isoDateStr) {
-      if (!isoDateStr) return '';
-      const dt = new Date(isoDateStr);
-      if (isNaN(dt.getTime())) return '';
-      return dt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    }
-
-    function formatShortDay(ymdStr) {
-      if (!ymdStr || ymdStr.length !== 8) return ymdStr;
-      const dt = new Date(Number(ymdStr.slice(0, 4)), Number(ymdStr.slice(4, 6)) - 1, Number(ymdStr.slice(6, 8)));
-      return dt.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-    }
-
-    function venueMatchesHomeGame(v, g) {
-      const vNorm = normalizeTeamKey(v.team);
-      const vLower = v.team.toLowerCase().trim();
-      const hNorm = normalizeTeamKey(g.homeName);
-      const hDisplayNorm = normalizeTeamKey(g.homeDisplayName);
-      const hShortNorm = normalizeTeamKey(g.homeShortName);
-      const hLower = g.homeDisplayName.toLowerCase().trim();
-
-      return (
-        hLower === vLower ||
-        vLower.includes(hLower) ||
-        hLower.includes(vLower) ||
-        (vNorm && (vNorm === hNorm || vNorm === hDisplayNorm || vNorm === hShortNorm))
-      );
-    }
-
-    function formatGameSummaryLine(g) {
-      const dayPart = g.ymd ? `${formatShortDay(g.ymd)} ` : '';
-      const timePart = g.gameTime ? ` ${g.gameTime}` : '';
-      const statusPart = g.statusDetail && g.statusDetail !== 'Scheduled' ? ` • ${g.statusDetail}` : '';
-      return `${dayPart}${g.awayShortName || g.awayDisplayName} @ ${g.homeShortName || g.homeDisplayName}${timePart}${statusPart}`;
-    }
-
-    function applyScheduleToVenues() {
-      if (!venues.length) return;
-      venues.forEach(v => {
-        v.isPlayingInWindow = false;
-        v.windowGames = [];
-        v.windowGameEntries = [];
-      });
-
-      if (!window._espnGamesByLeague) return;
-
-      venues.forEach(v => {
-        const games = window._espnGamesByLeague[v.league] || [];
-        const seen = new Set();
-
-        for (const g of games) {
-          if (venueMatchesHomeGame(v, g)) {
-            v.isPlayingInWindow = true;
-            const line = formatGameSummaryLine(g);
-            if (!seen.has(line)) {
-              seen.add(line);
-              v.windowGames.push(line);
-              v.windowGameEntries.push({
-                team: v.team,
-                league: v.league,
-                venue: v.venue,
-                line,
-                isoDate: g.isoDate || ''
-              });
-            }
-          }
-        }
-      });
-    }
-
-    async function parseLeagueScoreboardDate(league, ymd) {
-      const baseUrl = ESPN_SCOREBOARD_URLS[league];
-      if (!baseUrl) return [];
-      try {
-        const resp = await fetch(`${baseUrl}?dates=${ymd}`);
-        if (!resp.ok) return [];
-        const data = await resp.json();
-        const events = Array.isArray(data.events) ? data.events : [];
-        const parsed = [];
-
-        events.forEach(ev => {
-          const comp = ev.competitions && ev.competitions[0];
-          const competitors = (comp && comp.competitors) || [];
-          const home = competitors.find(c => c.homeAway === 'home');
-          const away = competitors.find(c => c.homeAway === 'away');
-          if (!home || !away) return;
-
-          const homeTeam = home.team || {};
-          const awayTeam = away.team || {};
-          const statusDetail = (ev.status && ev.status.type && ev.status.type.shortDetail) || '';
-
-          parsed.push({
-            ymd,
-            isoDate: ev.date || '',
-            homeName: homeTeam.name || '',
-            homeDisplayName: homeTeam.displayName || homeTeam.name || '',
-            homeShortName: homeTeam.shortDisplayName || homeTeam.name || '',
-            awayDisplayName: awayTeam.displayName || awayTeam.name || '',
-            awayShortName: awayTeam.shortDisplayName || awayTeam.name || '',
-            gameTime: formatGameTime(ev.date),
-            statusDetail
-          });
-        });
-
-        return parsed;
-      } catch (err) {
-        return [];
-      }
-    }
-
-    async function fetchNextHomeGamesForAllVenues() {
-      const startDt = new Date();
-      const endDt = new Date();
-      endDt.setDate(endDt.getDate() + NEXT_HOME_LOOKAHEAD_DAYS);
-      const ymdList = enumerateDatesYMD(formatIsoLocalDate(startDt), formatIsoLocalDate(endDt), NEXT_HOME_LOOKAHEAD_DAYS);
-      const byLeague = {};
-      ALL_LEAGUES_ORDER.forEach(l => { byLeague[l] = []; });
-
-      await Promise.all(
-        ALL_LEAGUES_ORDER.flatMap(league =>
-          ymdList.map(async (ymd) => {
-            const list = await parseLeagueScoreboardDate(league, ymd);
-            byLeague[league].push(...list);
-          })
-        )
-      );
-
-      window._espnUpcomingByLeague = byLeague;
-      nextHomeLookupLoaded = true;
-      assignNextHomeGamesToVenues();
-    }
-
-    function assignNextHomeGamesToVenues() {
-      if (!venues.length || !window._espnUpcomingByLeague) return;
-      const nowMs = Date.now() - 4 * 3600 * 1000;
-
-      venues.forEach(v => {
-        const games = (window._espnUpcomingByLeague[v.league] || [])
-          .filter(g => venueMatchesHomeGame(v, g))
-          .sort((a, b) => {
-            const ta = Date.parse(a.isoDate || '') || Number(a.ymd + '0000');
-            const tb = Date.parse(b.isoDate || '') || Number(b.ymd + '0000');
-            return ta - tb;
-          });
-
-        const upcoming = games.find(g => {
-          const ts = Date.parse(g.isoDate || '');
-          return isNaN(ts) ? g.ymd >= getLocalDateYMD() : ts >= nowMs;
-        }) || games[0] || null;
-
-        v.nextHomeGame = upcoming ? formatGameSummaryLine(upcoming) : '';
-      });
-    }
-
-    async function fetchScoreboardsForRange(startIso, endIso, label = 'Today') {
-      const ymdList = enumerateDatesYMD(startIso, endIso);
-      const results = {};
-      ALL_LEAGUES_ORDER.forEach(l => { results[l] = []; });
-
-      await Promise.all(
-        ALL_LEAGUES_ORDER.flatMap(league =>
-          ymdList.map(async (ymd) => {
-            const parsed = await parseLeagueScoreboardDate(league, ymd);
-            results[league].push(...parsed);
-          })
-        )
-      );
-
-      window._espnGamesByLeague = results;
-      activeDateRangeLabel = label;
-      scheduleLoaded = true;
-      applyScheduleToVenues();
-      updateMapFilters();
-    }
-    const BIG_4_ORDER = ["NFL", "MLB", "NBA", "NHL"];
-    const OTHER_LEAGUES_ORDER = ["MLS", "NWSL", "WNBA"];
+    const POWER_4 = new Set(["ACC", "Big Ten", "Big 12", "SEC"]);
+    const GROUP_OF_6 = new Set(["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"]);
 
     const osmStandard = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, noWrap: true });
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, noWrap: true });
@@ -717,8 +415,7 @@
     let currentFilteredVenues = [];
     let currentVenueIndex = -1;
     let markersMap = {}; 
-    let activeFilterKey = null; // Can be league name or "metro:MetroName"
-    let todayOnlyMode = false; // Keeps Today active while narrowing by league or metro
+    let activeConference = null;
 
     function getNationalZoom() {
       return window.innerWidth <= 1100 ? 3 : 4;
@@ -747,71 +444,17 @@
       setTimeout(() => { map.invalidateSize(); }, 100);
     }
 
-    function buildScheduledGamesFeedHtml() {
-      const showFeed = dateWindowActive || (activeFilterKey && activeFilterKey.startsWith('metro:'));
-      if (!showFeed) return '';
-
-      const entries = [];
-      currentFilteredVenues.forEach(v => {
-        if (v.windowGameEntries && v.windowGameEntries.length) {
-          v.windowGameEntries.forEach(entry => entries.push(entry));
-        }
-      });
-
-      const headingText = activeFilterKey && activeFilterKey.startsWith('metro:')
-        ? `Scheduled Games (${activeDateRangeLabel})`
-        : `Scheduled Home Games (${activeDateRangeLabel})`;
-
-      if (!entries.length) {
-        return `
-          <div style="margin-top:4px;">
-            <div class="section-heading" style="margin-left:0;">${headingText}</div>
-            <div class="photo-placeholder" style="padding:8px 4px;">No scheduled home games found for the selected filter and dates.</div>
-          </div>
-        `;
-      }
-
-      const itemsHtml = entries.map(e => {
-        const safeTeam = e.team.replace(/'/g, "\\'");
-        return `
-          <div class="game-feed-item">
-            <span class="game-feed-team" onclick="focusTeamFromScheduleFeed('${safeTeam}')">${e.team}</span>
-            <span style="font-size:9px; font-weight:700; color:#475569;"> (${e.league})</span>
-            <div>${e.line}</div>
-            <div class="game-feed-meta">${e.venue}</div>
-          </div>
-        `;
-      }).join('');
-
-      return `
-        <div style="margin-top:4px;">
-          <div class="section-heading" style="margin-left:0;">${headingText} (${entries.length})</div>
-          <div style="display:flex; flex-direction:column; gap:6px;">${itemsHtml}</div>
-        </div>
-      `;
-    }
-
-    window.focusTeamFromScheduleFeed = function(teamName) {
-      const target = currentFilteredVenues.find(item => item.team === teamName) || venues.find(item => item.team === teamName);
-      if (!target) return;
-      const globalIdx = currentFilteredVenues.findIndex(item => item.team === target.team);
-      map.flyTo(target.coords, 15, { duration: 0.8 });
-      if (markersMap[target.team]) markersMap[target.team].openPopup();
-      showVenueDetails(target, globalIdx);
-    };
-
     function resetRightPanel() {
       currentVenueIndex = -1;
       const panelContent = document.getElementById('panel-content');
       panelContent.innerHTML = `
         <div class="venue-photo-container">
-          <div class="photo-placeholder">Click any stadium marker on the map or team name in the sidebar to inspect details and Wikipedia photos.</div>
+          <div class="photo-placeholder">Click any stadium marker on the map or school name in the sidebar to inspect details and Wikipedia photos.</div>
         </div>
         <div>
-          <h2 class="team-title">Select a Team</h2>
+          <h2 class="team-title">Select a School</h2>
           <div class="team-subtitle">Interactive Dashboard</div>
         </div>
-        ${buildScheduledGamesFeedHtml()}
       `;
       document.querySelectorAll('.school-item').forEach(el => el.classList.remove('selected-active'));
       if (window.innerWidth <= 1100) {
@@ -851,12 +494,12 @@
       if (index !== -1) {
         currentVenueIndex = index;
       } else {
-        currentVenueIndex = currentFilteredVenues.findIndex(item => item.team === v.team);
+        currentVenueIndex = currentFilteredVenues.findIndex(item => item.college === v.college);
       }
 
-      const color = LEAGUE_COLORS[v.league] || "#475569";
+      const color = CONFERENCE_COLORS[v.conference] || "#475569";
       const capacityStr = v.capacity ? Number(v.capacity).toLocaleString() : 'N/A';
-      const wikiUrl = v.wikiUrl && v.wikiUrl.startsWith('http') ? v.wikiUrl : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.venue + ' ' + v.team)}`;
+      const wikiUrl = v.wikiUrl && v.wikiUrl.startsWith('http') ? v.wikiUrl : `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.venue + ' ' + v.college)}`;
 
       const panelContent = document.getElementById('panel-content');
       panelContent.innerHTML = `
@@ -864,8 +507,8 @@
           <div class="photo-placeholder">Loading Wikipedia photo...</div>
         </div>
         <div>
-          <span class="conf-badge-large" style="background:${color};">${v.league}</span>
-          <h2 class="team-title">${v.team}</h2>
+          <span class="conf-badge-large" style="background:${color};">${v.conference}</span>
+          <h2 class="team-title">${v.college} ${v.mascot}</h2>
           <div class="team-subtitle">${v.venueCity}</div>
         </div>
         <div class="info-grid">
@@ -879,8 +522,6 @@
           </div>
         </div>
         <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="wiki-btn">View on Wikipedia &rarr;</a>
-        ${v.nextHomeGame ? `<div class="notes-box" style="background:#f0fdf4; border-color:#bbf7d0; color:#14532d;"><b>Next Home Game:</b> ${v.nextHomeGame}</div>` : ''}
-        ${(v.windowGames && v.windowGames.length) ? `<div class="notes-box" style="background:#e0f2fe; border-color:#bae6fd; color:#0c4a6e;"><b>${activeDateRangeLabel === 'Today' ? "Today's Game" : 'Selected Dates'}:</b><br>${v.windowGames.join('<br>')}</div>` : ''}
         ${v.notes ? `<div class="notes-box"><b>Notes:</b> ${v.notes}</div>` : ''}
       `;
 
@@ -889,7 +530,7 @@
       }
 
       document.querySelectorAll('.school-item').forEach(el => el.classList.remove('selected-active'));
-      const activeEl = document.getElementById(`school-item-${v.team.replace(/\s+/g, '_')}`);
+      const activeEl = document.getElementById(`school-item-${v.college.replace(/\s+/g, '_')}`);
       if (activeEl) {
         activeEl.classList.add('selected-active');
         activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -906,196 +547,96 @@
       }
     }
 
-    function renderSidebarTree(leagueGrouped, metroGrouped) {
+    function renderSidebarTree(groupedData) {
       const container = document.getElementById('sidebar-tree');
       container.innerHTML = '';
 
-      const heading = document.createElement('div');
-      heading.className = 'section-heading';
-      heading.textContent = "Leagues";
-      container.appendChild(heading);
+      function renderGroupList(title, confNames) {
+        const heading = document.createElement('div');
+        heading.className = 'section-heading';
+        heading.textContent = title;
+        container.appendChild(heading);
 
-      ALL_LEAGUES_ORDER.forEach(league => {
-        if (!leagueGrouped[league]) return;
-        const teams = leagueGrouped[league].sort((a, b) => a.team.localeCompare(b.team));
-        const color = LEAGUE_COLORS[league] || "#475569";
+        confNames.sort().forEach(conf => {
+          if (!groupedData[conf]) return;
+          const schools = groupedData[conf].sort((a, b) => a.college.localeCompare(b.college));
+          const color = CONFERENCE_COLORS[conf] || "#475569";
 
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'conf-group';
+          const groupDiv = document.createElement('div');
+          groupDiv.className = 'conf-group';
 
-        const summaryDiv = document.createElement('div');
-        summaryDiv.className = 'conf-summary';
-        summaryDiv.innerHTML = `
-          <div class="conf-info-left">
-            <span class="conf-swatch" style="background:${color};"></span>
-            <span><b>${league}</b> (${teams.length})</span>
-          </div>
-          <span class="conf-toggle-arrow">▼</span>
-        `;
+          const summaryDiv = document.createElement('div');
+          summaryDiv.className = 'conf-summary';
+          summaryDiv.innerHTML = `
+            <div class="conf-info-left">
+              <span class="conf-swatch" style="background:${color};"></span>
+              <span><b>${conf}</b> (${schools.length})</span>
+            </div>
+            <span class="conf-toggle-arrow">▼</span>
+          `;
 
-        const listDiv = document.createElement('div');
-        listDiv.className = 'school-list';
-        listDiv.style.display = 'none';
+          const listDiv = document.createElement('div');
+          listDiv.className = 'school-list';
+          listDiv.style.display = 'none';
 
-        summaryDiv.addEventListener('click', () => {
-          const isHidden = listDiv.style.display === 'none';
+          summaryDiv.addEventListener('click', () => {
+            const isHidden = listDiv.style.display === 'none';
 
-          document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
-          document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
+            document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
 
-          if (isHidden) {
-            listDiv.style.display = 'flex';
-            summaryDiv.querySelector('.conf-toggle-arrow').textContent = '▲';
-            activeFilterKey = league;
-          } else {
-            activeFilterKey = null;
-          }
-
-          ['btn-select-all', 'btn-big-4', 'btn-little-3', 'btn-today'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            if (id === 'btn-today' && todayOnlyMode) {
-              btn.classList.add('active');
-              btn.style.background = '#0284c7';
-              btn.style.borderColor = '#0369a1';
+            if (isHidden) {
+              listDiv.style.display = 'flex';
+              summaryDiv.querySelector('.conf-toggle-arrow').textContent = '▲';
+              activeConference = conf;
             } else {
-              btn.classList.remove('active');
-              btn.style.background = '#334155';
-              btn.style.borderColor = '#475569';
+              activeConference = null;
             }
-          });
 
-          updateMapFilters();
-          map.setView([39.8283, -98.5795], getNationalZoom());
-          resetRightPanel();
-        });
+            ['btn-select-all', 'btn-power-4', 'btn-group-6', 'btn-select-none'].forEach(id => {
+              const btn = document.getElementById(id);
+              if (btn) btn.style.background = '#334155';
+            });
 
-        teams.forEach(v => {
-          const itemDiv = document.createElement('div');
-          itemDiv.className = 'school-item';
-          itemDiv.id = `school-item-${v.team.replace(/\s+/g, '_')}`;
-          itemDiv.innerHTML = `<span class="school-name">${v.team}</span>`;
-
-          itemDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const globalIdx = currentFilteredVenues.findIndex(item => item.team === v.team);
-            map.flyTo(v.coords, 15, { duration: 0.8 });
-            if (markersMap[v.team]) {
-              markersMap[v.team].openPopup();
-            }
-            showVenueDetails(v, globalIdx);
-          });
-
-          listDiv.appendChild(itemDiv);
-        });
-
-        groupDiv.appendChild(summaryDiv);
-        groupDiv.appendChild(listDiv);
-        container.appendChild(groupDiv);
-      });
-
-      // Metro Areas Section
-      const metroHeading = document.createElement('div');
-      metroHeading.className = 'section-heading';
-      metroHeading.textContent = "Metro Areas";
-      container.appendChild(metroHeading);
-
-      // Sort metros by total number of teams descending, then alphabetically by name
-      const sortedMetros = Object.keys(metroGrouped).sort((a, b) => {
-        const countDiff = metroGrouped[b].length - metroGrouped[a].length;
-        if (countDiff !== 0) return countDiff;
-        return a.localeCompare(b);
-      });
-
-      sortedMetros.forEach(metro => {
-        const teams = metroGrouped[metro].sort((a, b) => a.team.localeCompare(b.team));
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'conf-group';
-
-        const summaryDiv = document.createElement('div');
-        summaryDiv.className = 'conf-summary';
-        summaryDiv.innerHTML = `
-          <div class="conf-info-left">
-            <span class="conf-swatch" style="background:#64748b;"></span>
-            <span><b>${metro}</b> (${teams.length})</span>
-          </div>
-          <span class="conf-toggle-arrow">▼</span>
-        `;
-
-        const listDiv = document.createElement('div');
-        listDiv.className = 'school-list';
-        listDiv.style.display = 'none';
-
-        summaryDiv.addEventListener('click', () => {
-          const isHidden = listDiv.style.display === 'none';
-
-          document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
-          document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
-
-          if (isHidden) {
-            listDiv.style.display = 'flex';
-            summaryDiv.querySelector('.conf-toggle-arrow').textContent = '▲';
-            activeFilterKey = "metro:" + metro;
-
-            // Compute bounding box or center for metro teams to zoom in
-            let lats = teams.map(t => t.coords[0]);
-            let lngs = teams.map(t => t.coords[1]);
-            let minLat = Math.min(...lats), maxLat = Math.max(...lats);
-            let minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-            let centerLat = (minLat + maxLat) / 2;
-            let centerLng = (minLng + maxLng) / 2;
-
-            if (teams.length === 1) {
-              map.flyTo([centerLat, centerLng], 13, { duration: 0.8 });
-            } else {
-              map.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [50, 50], maxZoom: 12, duration: 0.8 });
-            }
-          } else {
-            activeFilterKey = null;
+            updateMapFilters();
             map.setView([39.8283, -98.5795], getNationalZoom());
-          }
-
-          ['btn-select-all', 'btn-big-4', 'btn-little-3', 'btn-today'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            if (id === 'btn-today' && todayOnlyMode) {
-              btn.classList.add('active');
-              btn.style.background = '#0284c7';
-              btn.style.borderColor = '#0369a1';
-            } else {
-              btn.classList.remove('active');
-              btn.style.background = '#334155';
-              btn.style.borderColor = '#475569';
-            }
+            resetRightPanel();
           });
 
-          updateMapFilters();
-          resetRightPanel();
-        });
+          schools.forEach(v => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'school-item';
+            itemDiv.id = `school-item-${v.college.replace(/\s+/g, '_')}`;
+            itemDiv.innerHTML = `<span class="school-name">${v.college}</span>`;
 
-        teams.forEach(v => {
-          const itemDiv = document.createElement('div');
-          itemDiv.className = 'school-item';
-          itemDiv.id = `school-item-${v.team.replace(/\s+/g, '_')}`;
-          itemDiv.innerHTML = `<span class="school-name">${v.team}</span>`;
+            itemDiv.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const globalIdx = currentFilteredVenues.findIndex(item => item.college === v.college);
+              map.flyTo(v.coords, 15, { duration: 0.8 });
+              if (markersMap[v.college]) {
+                markersMap[v.college].openPopup();
+              }
+              showVenueDetails(v, globalIdx);
+            });
 
-          itemDiv.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const globalIdx = currentFilteredVenues.findIndex(item => item.team === v.team);
-            map.flyTo(v.coords, 15, { duration: 0.8 });
-            if (markersMap[v.team]) {
-              markersMap[v.team].openPopup();
-            }
-            showVenueDetails(v, globalIdx);
+            listDiv.appendChild(itemDiv);
           });
 
-          listDiv.appendChild(itemDiv);
+          groupDiv.appendChild(summaryDiv);
+          groupDiv.appendChild(listDiv);
+          container.appendChild(groupDiv);
         });
+      }
 
-        groupDiv.appendChild(summaryDiv);
-        groupDiv.appendChild(listDiv);
-        container.appendChild(groupDiv);
-      });
+      const p4Confs = Object.keys(groupedData).filter(c => POWER_4.has(c));
+      const g6Confs = Object.keys(groupedData).filter(c => GROUP_OF_6.has(c));
+      const otherConfs = Object.keys(groupedData).filter(c => !POWER_4.has(c) && !GROUP_OF_6.has(c));
+
+      renderGroupList("Power 4", p4Confs);
+      renderGroupList("Group of 6", g6Confs);
+      if (otherConfs.length > 0) {
+        renderGroupList("Other / Independents", otherConfs);
+      }
 
       updateMapFilters();
     }
@@ -1105,56 +646,39 @@
       markersMap = {};
       currentFilteredVenues = [];
 
-      const btnAll = document.getElementById('btn-select-all');
-      const btnBig4 = document.getElementById('btn-big-4');
-      const btnLittle3 = document.getElementById('btn-little-3');
-      const btnToday = document.getElementById('btn-today');
-      const todayActive = todayOnlyMode || (btnToday && btnToday.classList.contains('active'));
-
       venues.forEach(v => {
         let show = false;
-        if (activeFilterKey) {
-          if (activeFilterKey.startsWith("metro:")) {
-            const targetMetro = activeFilterKey.substring(6);
-            show = (v.metro === targetMetro);
-          } else {
-            show = (v.league === activeFilterKey);
-          }
-          if (todayActive) show = show && Boolean(v.isPlayingInWindow);
-        } else if (todayActive) {
-          show = Boolean(v.isPlayingInWindow);
-        } else if (btnBig4 && btnBig4.classList.contains('active')) {
-          show = BIG_4.has(v.league);
-        } else if (btnLittle3 && btnLittle3.classList.contains('active')) {
-          show = LITTLE_3.has(v.league);
-        } else if (btnAll && btnAll.classList.contains('active')) {
-          show = true;
+        if (activeConference) {
+          show = (v.conference === activeConference);
         } else {
-          show = true;
+          const btnAll = document.getElementById('btn-select-all');
+          const btnP4 = document.getElementById('btn-power-4');
+          const btnG6 = document.getElementById('btn-group-6');
+          const btnNone = document.getElementById('btn-select-none');
+
+          if (btnAll.classList.contains('active')) show = true;
+          else if (btnP4.classList.contains('active')) show = POWER_4.has(v.conference);
+          else if (btnG6.classList.contains('active')) show = GROUP_OF_6.has(v.conference);
+          else if (btnNone.classList.contains('active')) show = false;
+          else show = true;
         }
 
         if (show) {
           currentFilteredVenues.push(v);
+          const color = CONFERENCE_COLORS[v.conference] || "#475569";
+          const marker = L.circleMarker(v.coords, {
+            radius: 6.5, fillColor: color, color: "#ffffff", weight: 1.5, opacity: 1, fillOpacity: 0.95
+          }).addTo(venueLayer);
+
+          marker.on('click', () => {
+            const globalIdx = currentFilteredVenues.findIndex(item => item.college === v.college);
+            map.flyTo(v.coords, 15, { duration: 0.8 });
+            showVenueDetails(v, globalIdx);
+          });
+
+          marker.bindTooltip(`<b>${v.college}</b>`, { direction: 'top', className: 'venue-tooltip', offset: [0, -8] });
+          markersMap[v.college] = marker;
         }
-      });
-
-      if (currentVenueIndex === -1 && (dateWindowActive || (activeFilterKey && activeFilterKey.startsWith('metro:')))) {
-        resetRightPanel();
-      }
-
-      currentFilteredVenues.forEach(v => {
-        const color = LEAGUE_COLORS[v.league] || "#475569";
-        const marker = L.circleMarker(v.coords, {
-          radius: 6.5, fillColor: color, color: "#ffffff", weight: 1.5, opacity: 1, fillOpacity: 0.95
-        }).addTo(venueLayer);
-
-        marker.on('click', () => {
-          const globalIdx = currentFilteredVenues.findIndex(item => item.team === v.team);
-          map.flyTo(v.coords, 15, { duration: 0.8 });
-          showVenueDetails(v, globalIdx);
-        });
-
-        markersMap[v.team] = marker;
       });
 
       document.getElementById('active-count').textContent = `${currentFilteredVenues.length} of ${venues.length} teams shown`;
@@ -1162,16 +686,8 @@
     }
 
     function setActiveFilterButton(btnId) {
-      if (btnId === 'btn-select-all' || btnId === 'btn-big-4' || btnId === 'btn-little-3') {
-        todayOnlyMode = false;
-        dateWindowActive = false;
-      } else if (btnId === 'btn-today') {
-        todayOnlyMode = true;
-        dateWindowActive = true;
-      }
-      ['btn-select-all', 'btn-big-4', 'btn-little-3', 'btn-today'].forEach(id => {
+      ['btn-select-all', 'btn-power-4', 'btn-group-6', 'btn-select-none'].forEach(id => {
         const btn = document.getElementById(id);
-        if (!btn) return;
         btn.classList.remove('active');
         btn.style.background = '#334155';
         btn.style.borderColor = '#475569';
@@ -1181,7 +697,7 @@
       activeBtn.style.background = '#0284c7';
       activeBtn.style.borderColor = '#0369a1';
 
-      activeFilterKey = null;
+      activeConference = null;
       document.querySelectorAll('.school-list').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.conf-toggle-arrow').forEach(el => el.textContent = '▼');
       map.setView([39.8283, -98.5795], getNationalZoom());
@@ -1211,96 +727,55 @@
       }
 
       venues = [];
-      const leagueGrouped = {};
-      const metroGrouped = {};
+      const grouped = {};
 
       rawRows.forEach(row => {
-        const league = String(getRowVal(row, ['League']) || '').trim();
-        const metro = String(getRowVal(row, ['Metro Area', 'Metro']) || 'Other').trim();
-        const team = String(getRowVal(row, ['Team', 'Team Name', 'Franchise', 'Club']) || '').trim();
-        const venueName = String(getRowVal(row, ['Venue Name', 'Stadium', 'Venue']) || '').trim();
-        const venueCity = String(getRowVal(row, ['City', 'Venue City']) || '').trim();
-        const capacity = getRowVal(row, ['Capacity', 'Seating Capacity', 'Venue Capacity']);
-        const notes = String(getRowVal(row, ['Notes', 'Notes (as needed)']) || '').trim();
+        const conf = String(getRowVal(row, ['FBS Conference', 'Conference']) || '').trim();
+        const college = String(getRowVal(row, ['College/University Name', 'College', 'Team Name']) || '').trim();
+        const mascot = String(getRowVal(row, ['Mascot']) || '').trim();
+        const venueName = String(getRowVal(row, ['Venue Name', 'Venue']) || '').trim();
+        const venueCity = String(getRowVal(row, ['Venue City', 'City']) || '').trim();
+        const capacity = getRowVal(row, ['Venue Capacity for Football', 'Capacity']);
+        const notes = String(getRowVal(row, ['Notes (as needed)', 'Notes']) || '').trim();
         const lat = parseFloat(getRowVal(row, ['Latitude', 'Lat']));
         const lng = parseFloat(getRowVal(row, ['Longitude', 'Lng']));
         const wikiUrl = String(getRowVal(row, ['Venue Wiki', 'Wiki', 'Wikipedia']) || '').trim();
 
-        if (!league || !venueName || isNaN(lat) || isNaN(lng) || !team) return;
-        const vObj = { league, metro, team, venue: venueName, venueCity, capacity, notes, coords: [lat, lng], wikiUrl };
+        if (!venueName || isNaN(lat) || isNaN(lng) || !college) return;
+        const vObj = { conference: conf, college, mascot, venue: venueName, venueCity, capacity, notes, coords: [lat, lng], wikiUrl };
         venues.push(vObj);
 
-        if (!leagueGrouped[league]) leagueGrouped[league] = [];
-        leagueGrouped[league].push(vObj);
-
-        if (!metroGrouped[metro]) metroGrouped[metro] = [];
-        metroGrouped[metro].push(vObj);
+        if (!grouped[conf]) grouped[conf] = [];
+        grouped[conf].push(vObj);
       });
 
-      renderSidebarTree(leagueGrouped, metroGrouped);
-      if (scheduleLoaded) {
-        applyScheduleToVenues();
-        updateMapFilters();
-      }
-      if (nextHomeLookupLoaded) {
-        assignNextHomeGamesToVenues();
-      }
+      renderSidebarTree(grouped);
     };
 
-    /* Collapsible Home Games Date Section */
-    document.getElementById('home-games-dropdown-toggle').addEventListener('click', () => {
-      const bodyEl = document.getElementById('home-games-dropdown-body');
-      const arrowEl = document.getElementById('home-games-dropdown-arrow');
-      const isHidden = bodyEl.style.display === 'none';
-      bodyEl.style.display = isHidden ? 'flex' : 'none';
-      arrowEl.textContent = isHidden ? '▲' : '▼';
-    });
-
-    /* Top Filter Buttons */
+    // Top Filter Buttons
     document.getElementById('btn-select-all').addEventListener('click', () => {
       setActiveFilterButton('btn-select-all');
       updateMapFilters();
     });
-    document.getElementById('btn-big-4').addEventListener('click', () => {
-      setActiveFilterButton('btn-big-4');
+    document.getElementById('btn-power-4').addEventListener('click', () => {
+      setActiveFilterButton('btn-power-4');
       updateMapFilters();
     });
-    document.getElementById('btn-little-3').addEventListener('click', () => {
-      setActiveFilterButton('btn-little-3');
+    document.getElementById('btn-group-6').addEventListener('click', () => {
+      setActiveFilterButton('btn-group-6');
       updateMapFilters();
     });
-    document.getElementById('btn-today').addEventListener('click', async () => {
-      const todayIso = formatIsoLocalDate(new Date());
-      document.getElementById('date-start').value = todayIso;
-      document.getElementById('date-end').value = '';
-      setActiveFilterButton('btn-today');
-      document.getElementById('active-count').textContent = "Checking today's games...";
-      await fetchScoreboardsForRange(todayIso, todayIso, 'Today');
+    document.getElementById('btn-select-none').addEventListener('click', () => {
+      setActiveFilterButton('btn-select-none');
+      updateMapFilters();
     });
 
-    document.getElementById('btn-apply-dates').addEventListener('click', async () => {
-      const startVal = document.getElementById('date-start').value;
-      const endVal = document.getElementById('date-end').value || startVal;
-      if (!startVal) return;
-      const label = startVal === endVal ? startVal : `${startVal} to ${endVal}`;
-      todayOnlyMode = true;
-      dateWindowActive = true;
-      setActiveFilterButton('btn-today');
-      document.getElementById('active-count').textContent = `Checking ${label}...`;
-      await fetchScoreboardsForRange(startVal, endVal, label);
-    });
-
-    const initialTodayIso = formatIsoLocalDate(new Date());
-    document.getElementById('date-start').value = initialTodayIso;
-    fetchScoreboardsForRange(initialTodayIso, initialTodayIso, 'Today');
-    fetchNextHomeGamesForAllVenues();
-
-    /* Initialize initial active button state color */
+    // Initialize initial active button state color
     const initialActiveBtn = document.getElementById('btn-select-all');
     initialActiveBtn.style.background = '#0284c7';
     initialActiveBtn.style.borderColor = '#0369a1';
 
-    /* Navigation Listeners */
+    // Navigation Listeners
     document.getElementById('back-to-conf-btn').addEventListener('click', () => {
       map.setView([39.8283, -98.5795], getNationalZoom());
       resetRightPanel();
@@ -1315,7 +790,7 @@
       }
       const v = currentFilteredVenues[currentVenueIndex];
       map.flyTo(v.coords, 15, { duration: 0.8 });
-      if (markersMap[v.team]) markersMap[v.team].openPopup();
+      if (markersMap[v.college]) markersMap[v.college].openPopup();
       showVenueDetails(v, currentVenueIndex);
     });
 
@@ -1328,7 +803,7 @@
       }
       const v = currentFilteredVenues[currentVenueIndex];
       map.flyTo(v.coords, 15, { duration: 0.8 });
-      if (markersMap[v.team]) markersMap[v.team].openPopup();
+      if (markersMap[v.college]) markersMap[v.college].openPopup();
       showVenueDetails(v, currentVenueIndex);
     });
 
