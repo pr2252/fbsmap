@@ -343,8 +343,8 @@
 
     .conf-chip-btn {
       border-radius: 5px;
-      padding: 5px 6px;
-      font-size: 10px;
+      padding: 4px 5px;
+      font-size: 9.5px;
       font-weight: 800;
       cursor: pointer;
       text-align: center;
@@ -355,15 +355,21 @@
       text-overflow: ellipsis;
     }
 
-    .conf-grid-2 {
+    .conf-grid-4 {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 4px;
     }
 
     .conf-grid-3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .conf-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 4px;
     }
 
@@ -404,7 +410,7 @@
   <div id="app-shell">
     <div class="nav-bar-banner" id="top-header-bar">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span>FBS</span>
+        <span>NCAA FBS</span>
         <span id="active-count" style="font-size: 11px; font-weight: 600; opacity: 0.9;">Loading...</span>
       </div>
     </div>
@@ -463,21 +469,25 @@
     const SHEET_NAME = "NCAA FBS";
 
     const CONFERENCE_COLORS = {
-      "ACC": "#005596",
-      "Big Ten": "#00274c",
-      "Big 12": "#c41230",
-      "SEC": "#e0a100",
-      "AAC": "#002b49",
-      "CUSA": "#d1261d",
-      "MAC": "#00529b",
-      "Mountain West": "#582c83",
-      "Pac-12": "#004b87",
-      "Sun Belt": "#e06d00",
-      "Independent": "#64748b"
+      "ACC": "#0284c7",           /* Sky Blue */
+      "Big Ten": "#1d4ed8",       /* Royal Blue */
+      "Big 12": "#dc2626",        /* Crimson Red */
+      "SEC": "#d97706",           /* Amber Gold */
+      "AAC": "#0d9488",           /* Teal */
+      "CUSA": "#e11d48",          /* Rose */
+      "MAC": "#4f46e5",           /* Indigo */
+      "Mountain West": "#7c3aed", /* Violet */
+      "Pac-12": "#059669",        /* Emerald Green */
+      "Sun Belt": "#ea580c",      /* Bright Orange */
+      "Independent": "#c026d3"    /* Magenta */
     };
 
     const POWER_4_ORDER = ["ACC", "Big Ten", "Big 12", "SEC"];
     const GROUP_OF_6_ORDER = ["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"];
+    const CONF_ROW_2_ORDER = ["AAC", "CUSA", "MAC"];
+    const CONF_ROW_3_ORDER = ["Mountain West", "Pac-12"];
+    const CONF_ROW_4_ORDER = ["Sun Belt", "Independent"];
+
     const POWER_4 = new Set(POWER_4_ORDER);
     const GROUP_OF_6 = new Set(GROUP_OF_6_ORDER);
 
@@ -524,7 +534,8 @@
       return String(str || '')
         .toLowerCase()
         .replace(/&/g, 'and')
-        .replace(/\b(university of|the|at|state|st\.?)\b/g, ' ')
+        .replace(/\b(university of|the|at)\b/g, ' ')
+        .replace(/\bst\.?\b/g, 'state')
         .replace(/[^a-z0-9 ]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
@@ -561,7 +572,7 @@
         if (
           candLower === collegeLower ||
           candLower === fullTeamLower ||
-          (collegeNorm && candNorm && (candNorm === collegeNorm || candNorm.startsWith(collegeNorm + ' ') || collegeNorm.startsWith(candNorm + ' ')))
+          (collegeNorm && candNorm && candNorm === collegeNorm)
         ) {
           return true;
         }
@@ -1101,47 +1112,71 @@
       confBodyDiv.className = 'filter-card-body';
       confBodyDiv.style.display = conferencesSectionExpanded ? 'flex' : 'none';
       confBodyDiv.style.flexDirection = 'column';
-      confBodyDiv.style.gap = '5px';
+      confBodyDiv.style.gap = '4px';
 
-      // Row 1: Preset buttons
-      const row1 = document.createElement('div');
-      row1.style.display = 'flex';
-      row1.style.gap = '4px';
-      row1.style.width = '100%';
-      row1.innerHTML = `
+      // Row 0: Preset buttons
+      const row0 = document.createElement('div');
+      row0.style.display = 'flex';
+      row0.style.gap = '4px';
+      row0.style.width = '100%';
+      row0.innerHTML = `
         <button type="button" class="conf-preset-btn" id="btn-conf-all">All</button>
         <button type="button" class="conf-preset-btn" id="btn-conf-power4">Power 4</button>
         <button type="button" class="conf-preset-btn" id="btn-conf-group6">Group of 6</button>
       `;
-      confBodyDiv.appendChild(row1);
+      confBodyDiv.appendChild(row0);
 
-      // Row 2: Power 4 in 2x2 grid
-      const p4Grid = document.createElement('div');
-      p4Grid.className = 'conf-grid-2';
+      // Row 1 (4 buttons): Power 4
+      const row1Grid = document.createElement('div');
+      row1Grid.className = 'conf-grid-4';
       POWER_4_ORDER.forEach(conf => {
         if (!conferenceGrouped[conf]) return;
-        p4Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
+        row1Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
       });
-      if (p4Grid.children.length) confBodyDiv.appendChild(p4Grid);
+      if (row1Grid.children.length) confBodyDiv.appendChild(row1Grid);
 
-      // Row 3: Group of 6 in 2-column grid
-      const g6Grid = document.createElement('div');
-      g6Grid.className = 'conf-grid-2';
-      GROUP_OF_6_ORDER.forEach(conf => {
+      // Row 2 (3 buttons): AAC, CUSA, MAC
+      const row2Grid = document.createElement('div');
+      row2Grid.className = 'conf-grid-3';
+      CONF_ROW_2_ORDER.forEach(conf => {
         if (!conferenceGrouped[conf]) return;
-        g6Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
+        row2Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
       });
-      if (g6Grid.children.length) confBodyDiv.appendChild(g6Grid);
+      if (row2Grid.children.length) confBodyDiv.appendChild(row2Grid);
 
-      // Row 4: Any remaining conferences (e.g., Independent)
-      const otherConfs = Object.keys(conferenceGrouped).filter(c => !POWER_4.has(c) && !GROUP_OF_6.has(c)).sort();
-      if (otherConfs.length) {
-        const otherGrid = document.createElement('div');
-        otherGrid.className = 'conf-grid-2';
-        otherConfs.forEach(conf => {
-          otherGrid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
+      // Row 3 (2 buttons): Mountain West, Pac-12
+      const row3Grid = document.createElement('div');
+      row3Grid.className = 'conf-grid-2';
+      CONF_ROW_3_ORDER.forEach(conf => {
+        if (!conferenceGrouped[conf]) return;
+        row3Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
+      });
+      if (row3Grid.children.length) confBodyDiv.appendChild(row3Grid);
+
+      // Row 4 (2 buttons): Sun Belt, Independent
+      const row4Grid = document.createElement('div');
+      row4Grid.className = 'conf-grid-2';
+      CONF_ROW_4_ORDER.forEach(conf => {
+        if (!conferenceGrouped[conf]) return;
+        row4Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
+      });
+      if (row4Grid.children.length) confBodyDiv.appendChild(row4Grid);
+
+      // Any unexpected extra conferences from sheet
+      const placedConfs = new Set([
+        ...POWER_4_ORDER,
+        ...CONF_ROW_2_ORDER,
+        ...CONF_ROW_3_ORDER,
+        ...CONF_ROW_4_ORDER
+      ]);
+      const extraConfs = Object.keys(conferenceGrouped).filter(c => !placedConfs.has(c)).sort();
+      if (extraConfs.length) {
+        const extraGrid = document.createElement('div');
+        extraGrid.className = 'conf-grid-2';
+        extraConfs.forEach(conf => {
+          extraGrid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
         });
-        confBodyDiv.appendChild(otherGrid);
+        confBodyDiv.appendChild(extraGrid);
       }
 
       confHeaderRow.addEventListener('click', () => {
