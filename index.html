@@ -475,18 +475,26 @@
       "SEC": "#d97706",           /* Amber Gold */
       "AAC": "#0d9488",           /* Teal */
       "CUSA": "#e11d48",          /* Rose */
-      "MAC": "#4f46e5",           /* Indigo */
+      "MAC": "#22c55e",           /* Light Green */
       "Mountain West": "#7c3aed", /* Violet */
       "Pac-12": "#059669",        /* Emerald Green */
       "Sun Belt": "#ea580c",      /* Bright Orange */
-      "Independent": "#c026d3"    /* Magenta */
+      "Independent": "#64748b"    /* Gray Shade */
     };
 
     const POWER_4_ORDER = ["ACC", "Big Ten", "Big 12", "SEC"];
     const GROUP_OF_6_ORDER = ["AAC", "CUSA", "MAC", "Mountain West", "Pac-12", "Sun Belt"];
-    const CONF_ROW_2_ORDER = ["AAC", "CUSA", "MAC"];
-    const CONF_ROW_3_ORDER = ["Mountain West", "Pac-12"];
-    const CONF_ROW_4_ORDER = ["Sun Belt", "Independent"];
+    const CONF_ROW_2_ORDER = ["AAC", "CUSA", "MAC", "Mountain West"];
+    const CONF_ROW_3_ORDER = ["Pac-12", "Sun Belt", "Independent"];
+
+    const CONFERENCE_BUTTON_LABELS = {
+      "Mountain West": "MW",
+      "Independent": "Ind"
+    };
+
+    function getConferenceButtonLabel(conf) {
+      return CONFERENCE_BUTTON_LABELS[conf] || conf;
+    }
 
     const POWER_4 = new Set(POWER_4_ORDER);
     const GROUP_OF_6 = new Set(GROUP_OF_6_ORDER);
@@ -534,8 +542,8 @@
       return String(str || '')
         .toLowerCase()
         .replace(/&/g, 'and')
-        .replace(/\b(university of|the|at)\b/g, ' ')
-        .replace(/\bst\.?\b/g, 'state')
+        .replace(/ (university of|the|at) /g, ' ')
+        .replace(/ st\.? /g, 'state')
         .replace(/[^a-z0-9 ]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
@@ -584,7 +592,7 @@
       const dayPart = g.ymd ? `${formatShortDay(g.ymd)} ` : '';
       const timePart = g.gameTime ? ` ${g.gameTime}` : '';
       const rawStatus = (g.statusDetail || '').trim();
-      const isDateTimestamp = /\d{1,2}\/\d{1,2}|\b(AM|PM|EST|EDT|CST|CDT|MST|MDT|PST|PDT)\b/i.test(rawStatus);
+      const isDateTimestamp = /\d{1,2}\/\d{1,2}| (AM|PM|EST|EDT|CST|CDT|MST|MDT|PST|PDT) /i.test(rawStatus);
       const statusPart = rawStatus && rawStatus !== 'Scheduled' && !isDateTimestamp ? ` • ${rawStatus}` : '';
       return `${dayPart}${g.awayShortName || g.awayDisplayName} @ ${g.homeShortName || g.homeDisplayName}${timePart}${statusPart}`;
     }
@@ -792,7 +800,7 @@
       }
 
       const itemsHtml = sortedVenues.map(v => {
-        const safeCollege = v.college.replace(/'/g, "\\'");
+        const safeCollege = v.college.replace(/'/g, "\'");
         const color = CONFERENCE_COLORS[v.conference] || "#475569";
         const displayLabel = `${v.college} ${v.mascot}`.trim();
         return `
@@ -847,7 +855,7 @@
       }
 
       const itemsHtml = entries.map(e => {
-        const safeCollege = e.team.replace(/'/g, "\\'");
+        const safeCollege = e.team.replace(/'/g, "\'");
         const color = CONFERENCE_COLORS[e.conference] || "#475569";
         return `
           <div class="game-feed-item" style="border-left-color:${color}; background:${color}10;">
@@ -1075,7 +1083,7 @@
       btn.type = 'button';
       btn.className = 'conf-chip-btn';
       btn.setAttribute('data-conf', encodedConf);
-      btn.innerHTML = `${conf} <span class="conf-count-label" data-conf="${encodedConf}">(${count})</span>`;
+      btn.innerHTML = `${getConferenceButtonLabel(conf)} <span class="conf-count-label" data-conf="${encodedConf}">(${count})</span>`;
 
       btn.addEventListener('click', () => {
         hasUserFiltered = true;
@@ -1135,39 +1143,29 @@
       });
       if (row1Grid.children.length) confBodyDiv.appendChild(row1Grid);
 
-      // Row 2 (3 buttons): AAC, CUSA, MAC
+      // Row 2 (4 buttons): AAC, CUSA, MAC, MW
       const row2Grid = document.createElement('div');
-      row2Grid.className = 'conf-grid-3';
+      row2Grid.className = 'conf-grid-4';
       CONF_ROW_2_ORDER.forEach(conf => {
         if (!conferenceGrouped[conf]) return;
         row2Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
       });
       if (row2Grid.children.length) confBodyDiv.appendChild(row2Grid);
 
-      // Row 3 (2 buttons): Mountain West, Pac-12
+      // Row 3 (3 buttons): Pac-12, Sun Belt, Ind
       const row3Grid = document.createElement('div');
-      row3Grid.className = 'conf-grid-2';
+      row3Grid.className = 'conf-grid-3';
       CONF_ROW_3_ORDER.forEach(conf => {
         if (!conferenceGrouped[conf]) return;
         row3Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
       });
       if (row3Grid.children.length) confBodyDiv.appendChild(row3Grid);
 
-      // Row 4 (2 buttons): Sun Belt, Independent
-      const row4Grid = document.createElement('div');
-      row4Grid.className = 'conf-grid-2';
-      CONF_ROW_4_ORDER.forEach(conf => {
-        if (!conferenceGrouped[conf]) return;
-        row4Grid.appendChild(createConferenceButtonElement(conf, conferenceGrouped[conf].length));
-      });
-      if (row4Grid.children.length) confBodyDiv.appendChild(row4Grid);
-
       // Any unexpected extra conferences from sheet
       const placedConfs = new Set([
         ...POWER_4_ORDER,
         ...CONF_ROW_2_ORDER,
-        ...CONF_ROW_3_ORDER,
-        ...CONF_ROW_4_ORDER
+        ...CONF_ROW_3_ORDER
       ]);
       const extraConfs = Object.keys(conferenceGrouped).filter(c => !placedConfs.has(c)).sort();
       if (extraConfs.length) {
